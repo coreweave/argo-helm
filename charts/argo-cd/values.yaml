@@ -1,3 +1,6 @@
+nodeSelector:
+  region: ORD1
+
 ## Argo CD configuration
 ## Ref: https://github.com/argoproj/argo-cd
 ##
@@ -10,6 +13,8 @@ fullnameOverride: ""
 kubeVersionOverride: ""
 
 global:
+  skipCrds: true 
+
   image:
     # -- If defined, a repository applied to all Argo CD deployments
     repository: quay.io/argoproj/argocd
@@ -112,15 +117,15 @@ controller:
   ## Application controller commandline flags
   args:
     # -- define the application controller `--status-processors`
-    statusProcessors: "20"
+    statusProcessors: "50"
     # -- define the application controller `--operation-processors`
-    operationProcessors: "10"
+    operationProcessors: "25"
     # -- define the application controller `--app-resync`
     appResyncPeriod: "180"
     # -- define the application controller `--self-heal-timeout-seconds`
     selfHealTimeout: "5"
     # -- define the application controller `--repo-server-timeout-seconds`
-    repoServerTimeoutSeconds: "60"
+    repoServerTimeoutSeconds: "500"
 
   # -- Application controller log format. Either `text` or `json`
   logFormat: text
@@ -312,7 +317,7 @@ controller:
   ## Enable if you would like to grant rights to Argo CD to deploy to the local Kubernetes cluster.
   clusterAdminAccess:
     # -- Enable RBAC for local cluster deployments
-    enabled: true
+    enabled: false
 
   ## Enable this and set the rules: to whatever custom rules you want for the Cluster Role resource.
   ## Defaults to off
@@ -915,14 +920,14 @@ server:
   ## Certificate configuration
   certificate:
     # -- Enables a certificate manager certificate
-    enabled: false
+    enabled: true
     # -- Certificate manager domain
     domain: argocd.example.com
     issuer:
       # -- Certificate manager issuer
-      kind: # ClusterIssuer
+      kind: ClusterIssuer
       # -- Certificate manager name
-      name: # letsencrypt
+      name: letsencrypt-prod
     # -- Certificate manager additional hosts
     additionalHosts: []
     # -- Certificate manager secret name
@@ -932,10 +937,14 @@ server:
   service:
     # -- Server service annotations
     annotations: {}
+
+    externaldns:
+      enabled: true 
+    
     # -- Server service labels
     labels: {}
     # -- Server service type
-    type: ClusterIP
+    type: LoadBalancer
     # -- Server service http port for NodePort service type (only if `server.service.type` is set to "NodePort")
     nodePortHttp: 30080
     # -- Server service https port for NodePort service type (only if `server.service.type` is set to "NodePort")
@@ -1283,7 +1292,7 @@ server:
   ## Enable if you would like to grant rights to Argo CD to deploy to the local Kubernetes cluster.
   clusterAdminAccess:
     # -- Enable RBAC for local cluster deployments
-    enabled: true
+    enabled: false
 
   GKEbackendConfig:
     # -- Enable BackendConfig custom resource for Google Kubernetes Engine

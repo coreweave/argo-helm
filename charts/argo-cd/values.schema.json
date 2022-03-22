@@ -1,0 +1,209 @@
+{
+    "$schema": "http://json-schema.org/schema#",
+    "properties": {
+        "nodeSelector": {
+            "type": "object",
+            "form": true,
+            "title": "Node Selection",
+            "required": [
+                "region"
+            ],
+            "properties": {
+                "region": {
+                    "type": "string",
+                    "enum": [
+                        "ORD1",
+                        "EWR1",
+                        "LAS1",
+                        "LGA1"
+                    ],
+                    "form": true,
+                    "title": "Region",
+                    "customComponent": {
+                        "id": "region_selector",
+                        "component": "RegionSelector",
+                        "description": "Select your preferred region for your FileBrowser",
+                        "title": "Geographic Location"
+                    }
+                }
+            }
+        },
+        "controller": {
+            "type": "object",
+            "form": "true",
+            "title": "Controller",
+            "properties": {
+                "LogLevel": {
+                    "type": "string",
+                    "form": "true",
+                    "title": "Log Level",
+                    "enum": [
+                        "error",
+                        "debug",
+                        "info",
+                        "warn"
+                    ]
+                },
+                "LogFormat": {
+                    "type":"string",
+                    "form": "true",
+                    "title": "Log Format",
+                    "enum": [
+                        "text", "json"
+                    ]
+                },
+                "containerPort": {
+                    "type": "integer",
+                    "form":"true",
+                    "title": "Container Port",
+                    "description": "The Container port for the controller."
+                },
+                "service": {
+                    "type": "object",
+                    "form":"true",
+                    "title": "Service",
+                    "properties": {
+                        "port": {
+                            "type": "integer",
+                            "form": "true",
+                            "title": "Port",
+                            "description": "The port for the controller service."
+                        }
+                    }
+                }
+            },
+            "metrics": {
+                "type": "object",
+                "form": "true",
+                "title": "Metrics",
+                "properties": {
+                    "enabled": {
+                        "type": "boolean",
+                        "form": "true",
+                        "title": "Enabled",
+                        "description": "Enable metrics for the Argocd Controller."
+                    }
+                }
+            }
+        },
+        "dex": {
+            "type": "object",
+            "form": "true",
+            "title": "Dex",
+            "properties": {
+                "metrics": {
+                    "type":"object",
+                    "form": "true",
+                    "title": "Metrics",
+                    "properties": {
+                        "enabled": {
+                            "type":"boolean",
+                            "form":"true",
+                            "title": "Enabled",
+                            "description": "Enable Metrics for the Dex Server."
+                        }
+                    }
+                }
+            }
+        },
+        "redis": {
+            "type": "object",
+            "form":"true",
+            "title": "Redis",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "form":"true",
+                    "title": "Enabled",
+                    "description": "Enable Redis for argocd."
+                }
+            }
+        },
+        "redis-ha": {
+            "type": "object",
+            "form":"true",
+            "title": "Redis High Availability",
+            "description": "A High Availability Redis Cluster",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "form":"true",
+                    "title": "Enabled",
+                    "description": "Enable a HA Redis cluster, this setting omits the previous redis deployment"
+                }
+            }
+        },
+        "server": {
+            "type":"object",
+            "form":"true",
+            "title": "Server",
+            "properties": {
+                "metrics": {
+                    "type": "object",
+                    "form":"true",
+                    "title":"Metrics",
+                    "properties": {
+                        "enabled": {
+                            "type":"boolean",
+                            "form":"true",
+                            "title":"Enabled",
+                            "description": "Enable Metrics for the Argocd Server."
+                        }
+                    }
+                }
+            }
+        },
+        "repoServer": {
+            "type": "object",
+            "form":"true",
+            "title": "Repo Server",
+            "properties": {
+                "metrics": {
+                    "type": "object",
+                    "form":"true",
+                    "title":"Metrics",
+                    "properties": {
+                        "enabled": {
+                            "type" : "boolean",
+                            "form":"true",
+                            "title": "Enabled" 
+                        }
+                    }
+                },
+                "logLevel": {
+                    "type": "string",
+                    "form":"true",
+                    "title": "Log Level",
+                    "description": "The Log Level for the Repo Server.",
+                    "enum": [
+                        "error",
+                        "debug",
+                        "info",
+                        "warn"
+                    ]
+                },
+                "logFormat": {
+                    "type": "string",
+                    "form": "true",
+                    "title": "Log Format",
+                    "description": "The Log Format for the Repo Server.",
+                    "enum": [
+                        "text", "json"
+                    ]
+                }
+            }
+        },
+        "notifications": {
+            "type": "object",
+            "form":"true",
+            "title": "Notifications Controller",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "form": "true",
+                    "title": "Enabled" 
+                }
+            }
+        }
+    }
+}

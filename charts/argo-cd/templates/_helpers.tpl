@@ -270,3 +270,10 @@ Create the name of the configmap to use
     {{ default "argocd-notifications-cm" .Values.notifications.cm.name }}
 {{- end -}}
 {{- end -}}
+
+{{/* 
+    Create Hostname helper -- Coreweave Use Only
+*/}}
+{{- define "coreweave.externalDnsName" -}}
+{{ printf "%s.%s.coreweave.cloud" .Release.Name .Release.Namespace }}
+{{- end -}}
