@@ -22,7 +22,12 @@ Helm lint:
 
 Helm push:
   stage: deploy
-  extends: .change_rules_helm
+  only:
+    refs:
+      - master
+    changes:
+      - .gitlab-ci.yml
+      - charts/argo-cd/*
   image:
     name: alpine/helm:3.3.1
     entrypoint: [""]
