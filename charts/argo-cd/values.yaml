@@ -1159,7 +1159,7 @@ server:
   configEnabled: true
   # -- [General Argo CD configuration]
   # @default -- See [values.yaml]
-  inclusions:     
+  config:
     resource.inclusions: |
       - apiGroups:
         - "networking.k8s.io"
@@ -1228,11 +1228,12 @@ server:
         clusters:
         - https://10.135.192.1:443
         - https://kubernetes.default.svc
-  config:
+      
     # Argo CD's externally facing base URL (optional). Required when configuring SSO
     url: https://argocd.example.com
-    # Argo CD instance label key
+    #  Argo CD instance label key
     application.instanceLabelKey: argocd.argoproj.io/instance
+
     # DEPRECATED: Please instead use configs.credentialTemplates and configs.repositories
     # repositories: |
     #   - url: git@github.com:group/repo.git
