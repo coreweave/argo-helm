@@ -11,5 +11,73 @@ metadata:
     {{ $key }}: {{ $value | quote }}
   {{- end }}
   {{- end }}
-data: {{- include "argo-cd.config" $ | nindent 4 }}
+data:
+  resource.inclusions: |
+    - apiGroups:
+      - "networking.k8s.io"
+      kinds:
+      - Ingress
+      - NetworkPolicy
+      clusters:
+      - https://10.135.192.1:443
+      - https://kubernetes.default.svc
+    - apiGroups:
+      - "cert-manager.io"
+      kinds:
+      - Certificate
+      clusters:
+      - https://10.135.192.1:443
+      - https://kubernetes.default.svc
+    - apiGroups:
+      - "*"
+      kinds:
+      - Deployment
+      - Pod
+      - ConfigMap
+      - Event
+      - LimitRange
+      - PersistentVolumeClaim
+      - PodTemplate
+      - ReplicationController
+      - Service
+      - Secret
+      - Endpoint
+      - ControllerRevision
+      - Application
+      - PodDisruptionBudget
+      - ServiceAccount
+      - StatefulSet
+      - SealedSecret
+      - Workflow
+      - WorkflowTemplate
+      - CronWorkflow
+      - AppProject
+      - Role
+      - RoleBinding
+      - InferenceService
+      - Revision
+      - PodAutoscaler
+      - Virtualservice
+      - HorizontalPodAutoscaler
+      - Batch
+      - Extention
+      - Job
+      - CronJob
+      - ResourceQuota
+      - IngressRoute
+      - IngressRouteTcp
+      - IngressRouteUdp
+      - Middleware
+      - TlsOption
+      - TlsStore
+      - TraefikService
+      - DataVolume
+      - ScaledObject
+      - Issuer
+      - CertificateRequest
+      - ServiceMonitor
+      - VirtualServer
+      clusters:
+      - https://10.135.192.1:443
+      - https://kubernetes.default.svc
 {{- end }}

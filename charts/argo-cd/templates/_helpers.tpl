@@ -241,7 +241,11 @@ Merge Argo Configuration with Preset Configuration
 {{- toYaml (mergeOverwrite (default dict (fromYaml (include "argo-cd.config.presets" $))) .Values.server.config) }}
   {{- end -}}
 {{- end -}}
-
+{{- define "coreweave.config" -}}
+  {{- if .Values.server.configEnabled -}}
+{{- toYaml (mergeOverwrite (default dict (fromYaml (include "argo-cd.config" $))) .Values.server.exclusions) }}
+    {{- end -}}
+{{- end -}}
 {{/*
 Return the default Argo CD app version
 */}}

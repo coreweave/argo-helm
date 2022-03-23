@@ -1,10 +1,13 @@
 nodeSelector:
   region: ORD1
 
+externalDns:
+  enabled: true #If disabled, you must configure your own DNS and Ingress routing to the LoadBalancer.
+
+
 ## Argo CD configuration
 ## Ref: https://github.com/argoproj/argo-cd
 ##
-
 # -- Provide a name in place of `argocd`
 nameOverride: argocd
 # -- String to fully override `"argo-cd.fullname"`
@@ -130,7 +133,7 @@ controller:
   # -- Application controller log format. Either `text` or `json`
   logFormat: text
   # -- Application controller log level
-  logLevel: info
+  logLevel: debug
 
   # -- Additional command line arguments to pass to application controller
   extraArgs: []
@@ -211,9 +214,12 @@ controller:
     portName: https-controller
 
   # -- [Node selector]
-  nodeSelector: {}
+  nodeSelector:
+    node.coreweave.cloud/class: cpu
   # -- [Tolerations] for use with node taints
-  tolerations: []
+  tolerations:
+    - key: is_cpu_compute
+      operator: Exists
   # -- Assign custom [affinity] rules to the deployment
   affinity: {}
 
@@ -504,9 +510,12 @@ dex:
   servicePortMetrics: 5558
 
   # -- [Node selector]
-  nodeSelector: {}
+  nodeSelector:
+    node.coreweave.cloud/class: cpu
   # -- [Tolerations] for use with node taints
-  tolerations: []
+  tolerations:
+    - key: is_cpu_compute
+      operator: Exists
   # -- Assign custom [affinity] rules to the deployment
   affinity: {}
 
@@ -611,7 +620,8 @@ redis:
   podLabels: {}
 
   # -- [Node selector]
-  nodeSelector: {}
+  nodeSelector:
+    node.coreweave.cloud/class: cpu
   # -- [Tolerations] for use with node taints
   tolerations: []
   # -- Assign custom [affinity] rules to the deployment
@@ -883,7 +893,9 @@ server:
   volumes: []
 
   # -- [Node selector]
-  nodeSelector: {}
+  nodeSelector:
+    node.coreweave.cloud/class: cpu
+
   # -- [Tolerations] for use with node taints
   tolerations: []
   # -- Assign custom [affinity] rules to the deployment
@@ -1147,12 +1159,80 @@ server:
   configEnabled: true
   # -- [General Argo CD configuration]
   # @default -- See [values.yaml]
+  inclusions:     
+    resource.inclusions: |
+      - apiGroups:
+        - "networking.k8s.io"
+        kinds:
+        - Ingress
+        - NetworkPolicy
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "cert-manager.io"
+        kinds:
+        - Certificate
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "*"
+        kinds:
+        - Deployment
+        - Pod
+        - ConfigMap
+        - Event
+        - LimitRange
+        - PersistentVolumeClaim
+        - PodTemplate
+        - ReplicationController
+        - Service
+        - Secret
+        - Endpoint
+        - ControllerRevision
+        - Application
+        - PodDisruptionBudget
+        - ServiceAccount
+        - StatefulSet
+        - SealedSecret
+        - Workflow
+        - WorkflowTemplate
+        - CronWorkflow
+        - AppProject
+        - Role
+        - RoleBinding
+        - InferenceService
+        - Revision
+        - PodAutoscaler
+        - Virtualservice
+        - HorizontalPodAutoscaler
+        - Batch
+        - Extention
+        - Job
+        - CronJob
+        - ResourceQuota
+        - IngressRoute
+        - IngressRouteTcp
+        - IngressRouteUdp
+        - Middleware
+        - TlsOption
+        - TlsStore
+        - TraefikService
+        - DataVolume
+        - ScaledObject
+        - Issuer
+        - CertificateRequest
+        - ServiceMonitor
+        - VirtualServer
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
   config:
     # Argo CD's externally facing base URL (optional). Required when configuring SSO
     url: https://argocd.example.com
     # Argo CD instance label key
     application.instanceLabelKey: argocd.argoproj.io/instance
-
     # DEPRECATED: Please instead use configs.credentialTemplates and configs.repositories
     # repositories: |
     #   - url: git@github.com:group/repo.git
@@ -1215,9 +1295,9 @@ server:
   # -- Deploy Argo CD Applications within this helm release
   # @default -- `[]` (See [values.yaml])
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/
-  additionalApplications: []
+  # additionalApplications:
   # - name: guestbook
-  #   namespace: argocd
+  #   namespace: tenant-sta-bjacobs1-test
   #   additionalLabels: {}
   #   additionalAnnotations: {}
   #   finalizers:
@@ -1231,7 +1311,7 @@ server:
   #       recurse: true
   #   destination:
   #     server: https://kubernetes.default.svc
-  #     namespace: guestbook
+  #     namespace: tenant-sta-bjacobs1
   #   syncPolicy:
   #     automated:
   #       prune: false
@@ -1504,9 +1584,12 @@ repoServer:
   #    emptyDir: {}
 
   # -- [Node selector]
-  nodeSelector: {}
+  nodeSelector:
+    node.coreweave.cloud/class: cpu
   # -- [Tolerations] for use with node taints
-  tolerations: []
+  tolerations:
+    - key: is_cpu_compute
+      operator: Exists
   # -- Assign custom [affinity] rules to the deployment
   affinity: {}
 
@@ -1990,10 +2073,13 @@ applicationSet:
     #   memory: 128Mi
 
   # -- [Node selector]
-  nodeSelector: {}
+  nodeSelector:
+    node.coreweave.cloud/class: cpu
 
   # -- [Tolerations] for use with node taints
-  tolerations: []
+  tolerations:
+    - key: is_cpu_compute
+      operator: Exists
 
   # -- Assign custom [affinity] rules
   affinity: {}
@@ -2101,7 +2187,8 @@ notifications:
   imagePullSecrets: []
 
   # -- [Node selector]
-  nodeSelector: {}
+  nodeSelector:
+    node.coreweave.cloud/class: cpu
 
   # -- The deployment strategy to use to replace existing pods with new ones
   updateStrategy:
@@ -2437,7 +2524,9 @@ notifications:
     #     attachments: "[{\n  \"title\": \"{{ .app.metadata.name}}\",\n  \"title_link\":\"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}\",\n  \"color\": \"#18be52\",\n  \"fields\": [\n  {\n    \"title\": \"Sync Status\",\n    \"value\": \"{{.app.status.sync.status}}\",\n    \"short\": true\n  },\n  {\n    \"title\": \"Repository\",\n    \"value\": \"{{.app.spec.source.repoURL}}\",\n    \"short\": true\n  }\n  {{range $index, $c := .app.status.conditions}}\n  {{if not $index}},{{end}}\n  {{if $index}},{{end}}\n  {\n    \"title\": \"{{$c.type}}\",\n    \"value\": \"{{$c.message}}\",\n    \"short\": true\n  }\n  {{end}}\n  ]\n}]    "
 
   # -- [Tolerations] for use with node taints
-  tolerations: []
+  tolerations:
+    - key: is_cpu_compute
+      operator: Exists
 
   # -- The trigger defines the condition when the notification should be sent
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/triggers/
@@ -2543,7 +2632,10 @@ notifications:
       affinity: {}
 
       # -- [Tolerations] for use with node taints
-      tolerations: []
+      tolerations:
+        - key: is_cpu_compute
+          operator: Exists
 
       # -- [Node selector]
-      nodeSelector: {}
+      nodeSelector:
+        node.coreweave.cloud/class: cpu

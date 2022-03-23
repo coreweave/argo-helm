@@ -28,6 +28,20 @@
                 }
             }
         },
+        "externalDns": {
+            "type": "object",
+            "form": "true",
+            "title": "External DNS",
+            "description": "Properties for External DNS, if disabled you will need to configure Ingress and DNS details",
+            "properties": {
+                "enabled": {
+                    "type": "boolean",
+                    "form": "true",
+                    "title": "Enabled",
+                    "description": "Enable Exteranl DNS to create a dns entry for argocd in the form of your-app-name.your-namespace.coreweave.cloud"
+                }
+            }
+        },
         "controller": {
             "type": "object",
             "form": "true",
