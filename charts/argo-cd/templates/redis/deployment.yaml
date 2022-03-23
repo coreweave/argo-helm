@@ -87,29 +87,25 @@ spec:
     {{- with .Values.redis.extraContainers }}
       {{- toYaml . | nindent 6 }}
     {{- end }}
-    {{- if .Values.redis.nodeSelector }}
       nodeSelector:
-{{- toYaml .Values.redis.nodeSelector | nindent 8 }}
-    {{- end }}
-    {{- if .Values.redis.tolerations }}
+        node.coreweave.cloud/class: cpu
+
       tolerations:
-{{- toYaml .Values.redis.tolerations | nindent 8 }}
-    {{- end }}
-    {{- if .Values.redis.affinity }}
+        - key: is_cpu_compute 
+          operator: Exists 
       affinity:
-{{- toYaml .Values.redis.affinity | nindent 8 }}
-    {{- end }}
-    {{- with .Values.redis.topologySpreadConstraints }}
-      topologySpreadConstraints:
-      {{- range $constraint := . }}
-      - {{ toYaml $constraint | nindent 8 | trim }}
-        {{- if not $constraint.labelSelector }}
-        labelSelector:
-          matchLabels:
-            app.kubernetes.io/name: {{ include "argo-cd.name" $ }}-{{ $.Values.redis.name }}
-        {{- end }}
-      {{- end }}
-    {{- end }}
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - ORD1
+                  - key: node.coreweave.cloud/class
+                    operator: In
+                    values:
+                      - cpu
 {{- if .Values.redis.volumes }}
       volumes:
 {{- toYaml .Values.redis.volumes | nindent 8}}

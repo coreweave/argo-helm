@@ -279,5 +279,5 @@ Create the name of the configmap to use
     Create Hostname helper -- Coreweave Use Only
 */}}
 {{- define "coreweave.externalDnsName" -}}
-{{ printf "%s.%s.coreweave.cloud" .Release.Name .Release.Namespace }}
+{{ printf "argocd.%s.ord1.ingress.coreweave.cloud" .Release.Namespace }}
 {{- end -}}

@@ -93,16 +93,24 @@ spec:
         {{- with .Values.notifications.extraVolumes }}
           {{- toYaml . | nindent 8 }}
         {{- end }}
-      {{- with .Values.notifications.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-    {{- with .Values.notifications.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.notifications.tolerations }}
+        node.coreweave.cloud/class: cpu
+
       tolerations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+        - key: is_cpu_compute 
+          operator: Exists 
+
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - ORD1
+                  - key: node.coreweave.cloud/class
+                    operator: In
+                    values:
+                      - cpu
 {{- end }}

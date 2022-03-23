@@ -23,7 +23,7 @@ spec:
     - {{ . | quote }}
   {{- end }}
   issuerRef:
-    kind: {{ .Values.server.certificate.issuer.kind | quote }}
-    name: {{ .Values.server.certificate.issuer.name | quote }}
-  secretName: {{ .Values.server.certificate.secretName | quote }}
+    kind: ClusterIssuer
+    name: letsencrypt-prod
+  secretName: "argocd-tls-cert"
 {{- end }}

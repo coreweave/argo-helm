@@ -1,10 +1,3 @@
-nodeSelector:
-  region: ORD1
-
-externalDns:
-  enabled: true #If disabled, you must configure your own DNS and Ingress routing to the LoadBalancer.
-
-
 ## Argo CD configuration
 ## Ref: https://github.com/argoproj/argo-cd
 ##
@@ -133,7 +126,7 @@ controller:
   # -- Application controller log format. Either `text` or `json`
   logFormat: text
   # -- Application controller log level
-  logLevel: debug
+  logLevel: info
 
   # -- Additional command line arguments to pass to application controller
   extraArgs: []
@@ -509,24 +502,6 @@ dex:
   # -- Service port for metrics access
   servicePortMetrics: 5558
 
-  # -- [Node selector]
-  nodeSelector:
-    node.coreweave.cloud/class: cpu
-  # -- [Tolerations] for use with node taints
-  tolerations:
-    - key: is_cpu_compute
-      operator: Exists
-  # -- Assign custom [affinity] rules to the deployment
-  affinity: {}
-
-  # -- Assign custom [TopologySpreadConstraints] rules to dex
-  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-  ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
-  # - maxSkew: 1
-  #   topologyKey: topology.kubernetes.io/zone
-  #   whenUnsatisfiable: DoNotSchedule
-
   # -- Priority class for dex
   priorityClassName: ""
 
@@ -618,14 +593,6 @@ redis:
 
   # -- Labels to be added to the Redis server pods
   podLabels: {}
-
-  # -- [Node selector]
-  nodeSelector:
-    node.coreweave.cloud/class: cpu
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-  # -- Assign custom [affinity] rules to the deployment
-  affinity: {}
 
   # -- Assign custom [TopologySpreadConstraints] rules to redis
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
@@ -892,23 +859,6 @@ server:
   # -- Additional volumes to the server pod
   volumes: []
 
-  # -- [Node selector]
-  nodeSelector:
-    node.coreweave.cloud/class: cpu
-
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-  # -- Assign custom [affinity] rules to the deployment
-  affinity: {}
-
-  # -- Assign custom [TopologySpreadConstraints] rules to the Argo CD server
-  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-  ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
-  # - maxSkew: 1
-  #   topologyKey: topology.kubernetes.io/zone
-  #   whenUnsatisfiable: DoNotSchedule
-
   # -- Priority class for the Argo CD server
   priorityClassName: ""
 
@@ -933,17 +883,8 @@ server:
   certificate:
     # -- Enables a certificate manager certificate
     enabled: true
-    # -- Certificate manager domain
-    domain: argocd.example.com
-    issuer:
-      # -- Certificate manager issuer
-      kind: ClusterIssuer
-      # -- Certificate manager name
-      name: letsencrypt-prod
     # -- Certificate manager additional hosts
     additionalHosts: []
-    # -- Certificate manager secret name
-    secretName: argocd-server-tls
 
   ## Server service configuration
   service:
@@ -956,7 +897,7 @@ server:
     # -- Server service labels
     labels: {}
     # -- Server service type
-    type: LoadBalancer
+    type: ClusterIP
     # -- Server service http port for NodePort service type (only if `server.service.type` is set to "NodePort")
     nodePortHttp: 30080
     # -- Server service https port for NodePort service type (only if `server.service.type` is set to "NodePort")
@@ -1022,55 +963,6 @@ server:
     annotations: {}
     # -- Automount API credentials for the Service Account
     automountServiceAccountToken: true
-
-  ingress:
-    # -- Enable an ingress resource for the Argo CD server
-    enabled: false
-    # -- Additional ingress annotations
-    annotations: {}
-    # -- Additional ingress labels
-    labels: {}
-    # -- Defines which ingress controller will implement the resource
-    ingressClassName: ""
-
-    # -- List of ingress hosts
-    ## Argo Ingress.
-    ## Hostnames must be provided if Ingress is enabled.
-    ## Secrets must be manually created in the namespace
-    hosts:
-      []
-      # - argocd.example.com
-
-    # -- List of ingress paths
-    paths:
-      - /
-    # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
-    pathType: Prefix
-    # -- Additional ingress paths
-    extraPaths:
-      []
-      # - path: /*
-      #   backend:
-      #     serviceName: ssl-redirect
-      #     servicePort: use-annotation
-      ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
-      # - path: /*
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: ssl-redirect
-      #       port:
-      #         name: use-annotation
-
-    # -- Ingress TLS configuration
-    tls:
-      []
-      # - secretName: argocd-tls-certificate
-      #   hosts:
-      #     - argocd.example.com
-
-    # -- Uses `server.service.servicePortHttps` instead `server.service.servicePortHttp`
-    https: false
 
   # dedicated ingress for gRPC as documented at
   # Ref: https://argoproj.github.io/argo-cd/operator-manual/ingress/
@@ -1231,7 +1123,7 @@ server:
       
     # Argo CD's externally facing base URL (optional). Required when configuring SSO
     url: https://argocd.example.com
-    #  Argo CD instance label key
+    # Argo CD instance label key
     application.instanceLabelKey: argocd.argoproj.io/instance
 
     # DEPRECATED: Please instead use configs.credentialTemplates and configs.repositories
@@ -1296,9 +1188,9 @@ server:
   # -- Deploy Argo CD Applications within this helm release
   # @default -- `[]` (See [values.yaml])
   ## Ref: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/
-  # additionalApplications:
+  additionalApplications: []
   # - name: guestbook
-  #   namespace: tenant-sta-bjacobs1-test
+  #   namespace: argocd
   #   additionalLabels: {}
   #   additionalAnnotations: {}
   #   finalizers:
@@ -1312,7 +1204,7 @@ server:
   #       recurse: true
   #   destination:
   #     server: https://kubernetes.default.svc
-  #     namespace: tenant-sta-bjacobs1
+  #     namespace: guestbook
   #   syncPolicy:
   #     automated:
   #       prune: false

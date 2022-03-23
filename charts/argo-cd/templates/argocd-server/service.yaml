@@ -2,10 +2,6 @@ apiVersion: v1
 kind: Service
 metadata:
   annotations:
-  {{ if .Values.server.service.externaldns.enabled }}
-    external-dns.alpha.kubernetes.io/hostname: {{ (include "coreweave.externalDnsName" . ) | quote }}
-  {{ end }}
-    metallb.universe.tf/address-pool: {{ printf "public-%s" (.Values.nodeSelector.region | lower) | quote }}
   {{- if .Values.server.service.annotations }}
   {{- range $key, $value := .Values.server.service.annotations }}
     {{ $key }}: {{ $value | quote }}

@@ -40,16 +40,23 @@ spec:
           {{- with .Values.notifications.bots.slack.containerSecurityContext }}
           securityContext: {{- toYaml . | nindent 12 }}
           {{- end }}
-      {{- with .Values.notifications.bots.slack.nodeSelector }}
       nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-    {{- with .Values.notifications.bots.slack.affinity }}
-      affinity:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
-    {{- with .Values.notifications.bots.slack.tolerations }}
+        node.coreweave.cloud/class: cpu
+
       tolerations:
-        {{- toYaml . | nindent 8 }}
-    {{- end }}
+        - key: is_cpu_compute 
+          operator: Exists 
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+              - matchExpressions:
+                  - key: topology.kubernetes.io/region
+                    operator: In
+                    values:
+                      - ORD1
+                  - key: node.coreweave.cloud/class
+                    operator: In
+                    values:
+                      - cpu
 {{ end }}
