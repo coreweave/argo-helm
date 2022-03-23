@@ -1,16 +1,5 @@
-.change_rules_helm:
-  before_script: []
-  rules:
-    - if: '$CI_COMMIT_BRANCH == "master"'
-    - &changes_helm
-      changes:
-        - .gitlab-ci.yml
-        - charts/argo-cd/*
-
-
 Helm lint:
   stage: test
-  extends: .change_rules_helm
   image:
     name: alpine/helm:3.3.1
     entrypoint: [""]
