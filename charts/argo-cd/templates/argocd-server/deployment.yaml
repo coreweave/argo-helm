@@ -149,25 +149,7 @@ spec:
         resources:
           {{- toYaml .Values.server.extensions.resources | nindent 10 }}
       {{- end }}
-      nodeSelector:
-        node.coreweave.cloud/class: cpu
-
-      tolerations:
-        - key: is_cpu_compute 
-          operator: Exists 
-      affinity:
-        nodeAffinity:
-          requiredDuringSchedulingIgnoredDuringExecution:
-            nodeSelectorTerms:
-              - matchExpressions:
-                  - key: topology.kubernetes.io/region
-                    operator: In
-                    values:
-                      - ORD1
-                  - key: node.coreweave.cloud/class
-                    operator: In
-                    values:
-                      - cpu
+      {{include "coreweave.nodeAffinityAndTolerations" . | nindent 6 }}
       serviceAccountName: {{ template "argo-cd.serverServiceAccountName" . }}
       {{- with .Values.global.hostAliases }}
       hostAliases:

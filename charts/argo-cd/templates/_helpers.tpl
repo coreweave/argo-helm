@@ -279,5 +279,29 @@ Create the name of the configmap to use
     Create Hostname helper -- Coreweave Use Only
 */}}
 {{- define "coreweave.externalDnsName" -}}
-{{ printf "argocd.%s.ord1.ingress.coreweave.cloud" .Release.Namespace }}
+{{ default (printf "argocd.%s.ord1.ingress.coreweave.cloud" .Release.Namespace) .Values.customExternalDnsName }}
+{{- end -}}
+
+{{/*
+    Create DRY Helpers
+*/}}
+{{- define "coreweave.nodeAffinityAndTolerations" -}}
+nodeSelector:
+  node.coreweave.cloud/class: cpu
+tolerations:
+  - key: is_cpu_compute
+    operator: Exists
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: topology.kubernetes.io/region
+              operator: In
+              values:
+                - ORD1
+            - key: node.coreweave.cloud/class
+              operator: In
+              values:
+                - cpu
 {{- end -}}

@@ -1,105 +1,6 @@
 {
     "$schema": "http://json-schema.org/schema#",
     "properties": {
-        "controller": {
-            "type": "object",
-            "form": "true",
-            "title": "Controller",
-            "properties": {
-                "LogLevel": {
-                    "type": "string",
-                    "form": "true",
-                    "title": "Log Level",
-                    "enum": [
-                        "error",
-                        "debug",
-                        "info",
-                        "warn"
-                    ]
-                },
-                "LogFormat": {
-                    "type":"string",
-                    "form": "true",
-                    "title": "Log Format",
-                    "enum": [
-                        "text", "json"
-                    ]
-                }
-            },
-            "metrics": {
-                "type": "object",
-                "form": "true",
-                "title": "Metrics",
-                "properties": {
-                    "enabled": {
-                        "type": "boolean",
-                        "form": "true",
-                        "title": "Enabled",
-                        "description": "Enable metrics for the Argocd Controller."
-                    }
-                }
-            }
-        },
-        "dex": {
-            "type": "object",
-            "form": "true",
-            "title": "Dex",
-            "properties": {
-                "metrics": {
-                    "type":"object",
-                    "form": "true",
-                    "title": "Metrics",
-                    "properties": {
-                        "enabled": {
-                            "type":"boolean",
-                            "form":"true",
-                            "title": "Enabled",
-                            "description": "Enable Metrics for the Dex Server."
-                        }
-                    }
-                }
-            }
-        },
-        "repoServer": {
-            "type": "object",
-            "form":"true",
-            "title": "Repo Server",
-            "properties": {
-                "metrics": {
-                    "type": "object",
-                    "form":"true",
-                    "title":"Metrics",
-                    "properties": {
-                        "enabled": {
-                            "type" : "boolean",
-                            "form":"true",
-                            "title": "Enabled" 
-                        }
-                    }
-                },
-                "logLevel": {
-                    "type": "string",
-                    "form":"true",
-                    "title": "Log Level",
-                    "description": "The Log Level for the Repo Server.",
-                    "enum": [
-                        "error",
-                        "debug",
-                        "info",
-                        "warn"
-                    ]
-                },
-                "logFormat": {
-                    "type": "string",
-                    "form": "true",
-                    "title": "Log Format",
-                    "description": "The Log Format for the Repo Server.",
-                    "enum": [
-                        "text", "json"
-                    ]
-                }
-            }
-        },
         "notifications": {
             "type": "object",
             "form":"true",
@@ -108,7 +9,8 @@
                 "enabled": {
                     "type": "boolean",
                     "form": "true",
-                    "title": "Enabled" 
+                    "title": "Enabled" ,
+                    "description": "Enable the Notifications controller to handle slack or other forms of Notifications."
                 }
             }
         }

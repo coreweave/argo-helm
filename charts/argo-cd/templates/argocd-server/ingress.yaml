@@ -4,6 +4,9 @@ apiVersion: {{ include "argo-cd.ingress.apiVersion" . }}
 kind: Ingress
 metadata:
   annotations:
+    {{- if .Values.customExternalDnsName }}
+    kubernetes.io/ingress.class: {{ .Values.customIngressControllerClassAnnotation }}
+    {{- end }}
     cert-manager.io/cluster-issuer: letsencrypt-prod
     traefik.ingress.kubernetes.io/redirect-entry-point: https
     ingress.kubernetes.io/force-ssl-redirect: "false"

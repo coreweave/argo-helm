@@ -1,3 +1,9 @@
+## CoreWeave Ingress Options
+
+# -- Provide a custom dns name in place of coreweave's ingress. Requires custom Ingress Controller
+customExternalDnsName: ''
+# -- Provide the annotation value for your ingress controller you wish to use.
+customIngressControllerClassAnnotation: ''
 
 ## Argo CD configuration
 ## Ref: https://github.com/argoproj/argo-cd
