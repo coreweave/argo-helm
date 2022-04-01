@@ -286,8 +286,6 @@ Create the name of the configmap to use
     Create DRY Helpers
 */}}
 {{- define "coreweave.nodeAffinityAndTolerations" -}}
-nodeSelector:
-  node.coreweave.cloud/class: cpu
 tolerations:
   - key: is_cpu_compute
     operator: Exists
@@ -304,4 +302,7 @@ affinity:
               operator: In
               values:
                 - cpu
+{{- end -}}
+{{- define "coreweave.certSecretName" -}}
+{{printf "%s-tls-cert" .Release.Name }}
 {{- end -}}

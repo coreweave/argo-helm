@@ -25,5 +25,5 @@ spec:
   issuerRef:
     kind: ClusterIssuer
     name: letsencrypt-prod
-  secretName: "argocd-tls-cert"
+  secretName: {{ include "coreweave.certSecretName" . | quote }}
 {{- end }}

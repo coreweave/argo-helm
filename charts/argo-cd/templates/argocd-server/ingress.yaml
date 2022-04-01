@@ -27,4 +27,4 @@ spec:
   tls:
     - hosts:
       - {{ include "coreweave.externalDnsName" . }}
-      secretName: argocd-tls-cert
+      secretName: {{ include "coreweave.certSecretName" . }}
