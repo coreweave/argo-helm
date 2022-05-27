@@ -31,8 +31,10 @@ controller:
   tolerations: []
   # -- Assign custom [affinity] rules to the deployment
   affinity: {}
+  # -- [priorityClassName] for the controller
+  priorityClassName: ""
   # -- The number of controller pods to run
-  replicas: 1
+  replicas: 2
   image:
     # -- Registry to use
     registry: quay.io
@@ -75,8 +77,8 @@ controller:
   # @default -- See [values.yaml]
   livenessProbe:
     httpGet:
-      path: /metrics
-      port: 8090
+      path: /healthz
+      port: healthz
     initialDelaySeconds: 30
     periodSeconds: 20
     failureThreshold: 3
@@ -88,12 +90,25 @@ controller:
   readinessProbe:
     httpGet:
       path: /metrics
-      port: 8090
+      port: metrics
     initialDelaySeconds: 15
     periodSeconds: 5
     failureThreshold: 3
     successThreshold: 1
     timeoutSeconds: 4
+
+  ## Configure Pod Disruption Budget for the controller
+  pdb:
+    # -- Labels to be added to controller [Pod Disruption Budget]
+    labels: {}
+    # -- Annotations to be added to controller [Pod Disruption Budget]
+    annotations: {}
+    # -- Deploy a [Pod Disruption Budget] for the controller
+    enabled: false
+    # -- Minimum number / percentage of pods that should remain scheduled
+    minAvailable: # 1
+    # -- Maximum number / percentage of pods that may be made unavailable
+    maxUnavailable: # 0
 
 serviceAccount:
   # -- Specifies whether a service account should be created
@@ -144,6 +159,10 @@ dashboard:
   tolerations: []
   # -- Assign custom [affinity] rules to the deployment
   affinity: {}
+  # -- [priorityClassName] for the dashboard server
+  priorityClassName: ""
+  # -- The number of dashboard pods to run
+  replicas: 1
   image:
     # -- Registry to use
     registry: quay.io
@@ -191,6 +210,19 @@ dashboard:
     # -- The name of the service account to use.
     # If not set and create is true, a name is generated using the fullname template
     name: ""
+
+  ## Configure Pod Disruption Budget for the dashboard
+  pdb:
+    # -- Labels to be added to dashboard [Pod Disruption Budget]
+    labels: {}
+    # -- Annotations to be added to dashboard [Pod Disruption Budget]
+    annotations: {}
+    # -- Deploy a [Pod Disruption Budget] for the dashboard
+    enabled: false
+    # -- Minimum number / percentage of pods that should remain scheduled
+    minAvailable: # 1
+    # -- Maximum number / percentage of pods that may be made unavailable
+    maxUnavailable: # 0
 
   ## Ingress configuration.
   ## ref: https://kubernetes.io/docs/user-guide/ingress/

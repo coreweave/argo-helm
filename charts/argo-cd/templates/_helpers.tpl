@@ -275,7 +275,7 @@ Create the name of the configmap to use
 {{- end -}}
 {{- end -}}
 
-{{/* 
+{{/*
     Create Hostname helper -- Coreweave Use Only
 */}}
 {{- define "coreweave.externalDnsName" -}}
@@ -305,4 +305,28 @@ affinity:
 {{- end -}}
 {{- define "coreweave.certSecretName" -}}
 {{printf "%s-tls-cert" .Release.Name }}
+{{- end -}}
+{{- define "argo-cd.redisPasswordEnv" -}}
+  {{- if or .Values.externalRedis.password .Values.externalRedis.existingSecret }}
+- name: REDIS_PASSWORD
+  valueFrom:
+    secretKeyRef:
+    {{- if .Values.externalRedis.existingSecret }}
+      name: {{ .Values.externalRedis.existingSecret }}
+    {{- else }}
+      name: {{ template "argo-cd.redis.fullname" . }}
+    {{- end }}
+      key: redis-password
+  {{- end }}
+{{- end -}}
+
+{{/*
+Return the appropriate apiVersion for pod disruption budget
+*/}}
+{{- define "argo-cd.podDisruptionBudget.apiVersion" -}}
+{{- if semverCompare "<1.21-0" (include "argo-cd.kubeVersion" $) -}}
+{{- print "policy/v1beta1" -}}
+{{- else -}}
+{{- print "policy/v1" -}}
+{{- end -}}
 {{- end -}}

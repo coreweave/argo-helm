@@ -16,7 +16,7 @@ fullnameOverride: ""
 kubeVersionOverride: ""
 
 global:
-  skipCrds: true 
+  skipCrds: true
 
   image:
     # -- If defined, a repository applied to all Argo CD deployments
@@ -269,6 +269,8 @@ controller:
       labels: {}
       # -- Metrics service port
       servicePort: 8082
+      # -- Metrics service port name
+      portName: http-metrics
     serviceMonitor:
       # -- Enable a prometheus ServiceMonitor
       enabled: false
@@ -282,6 +284,10 @@ controller:
       selector: {}
         # prometheus: kube-prometheus
 
+      # -- Prometheus ServiceMonitor scheme
+      scheme: ""
+      # -- Prometheus ServiceMonitor tlsConfig
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
       namespace: "" # "monitoring"
       # -- Prometheus ServiceMonitor labels
@@ -384,6 +390,8 @@ dex:
       annotations: {}
       # -- Metrics service labels
       labels: {}
+      # -- Metrics service port name
+      portName: http-metrics
     serviceMonitor:
       # -- Enable a prometheus ServiceMonitor
       enabled: false
@@ -397,6 +405,10 @@ dex:
       selector: {}
         # prometheus: kube-prometheus
 
+      # -- Prometheus ServiceMonitor scheme
+      scheme: ""
+      # -- Prometheus ServiceMonitor tlsConfig
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
       namespace: "" # "monitoring"
       # -- Prometheus ServiceMonitor labels
@@ -406,9 +418,10 @@ dex:
     # -- Dex image repository
     repository: ghcr.io/dexidp/dex
     # -- Dex image tag
-    tag: v2.30.0
+    tag: v2.30.2
     # -- Dex imagePullPolicy
-    imagePullPolicy: IfNotPresent
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
   initImage:
     # -- Argo CD init image repository
     # @default -- `""` (defaults to global.image.repository)
@@ -509,6 +522,21 @@ dex:
   # -- Service port for metrics access
   servicePortMetrics: 5558
 
+  # -- [Node selector]
+  nodeSelector: {}
+  # -- [Tolerations] for use with node taints
+  tolerations: []
+  # -- Assign custom [affinity] rules to the deployment
+  affinity: {}
+
+  # -- Assign custom [TopologySpreadConstraints] rules to dex
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
+  topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: topology.kubernetes.io/zone
+  #   whenUnsatisfiable: DoNotSchedule
+
   # -- Priority class for dex
   priorityClassName: ""
 
@@ -601,6 +629,13 @@ redis:
   # -- Labels to be added to the Redis server pods
   podLabels: {}
 
+  # -- [Node selector]
+  nodeSelector: {}
+  # -- [Tolerations] for use with node taints
+  tolerations: []
+  # -- Assign custom [affinity] rules to the deployment
+  affinity: {}
+
   # -- Assign custom [TopologySpreadConstraints] rules to redis
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
@@ -679,7 +714,7 @@ redis:
     enabled: false
     image:
       # -- redis-exporter image repository
-      repository: quay.io/bitnami/redis-exporter
+      repository: bitnami/redis-exporter
       # -- redis-exporter image tag
       tag: 1.26.0-debian-10-r2
       # -- redis-exporter image PullPolicy
@@ -720,6 +755,10 @@ redis:
       selector: {}
         # prometheus: kube-prometheus
 
+      # -- Prometheus ServiceMonitor scheme
+      scheme: ""
+      # -- Prometheus ServiceMonitor tlsConfig
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
       namespace: "" # "monitoring"
       # -- Prometheus ServiceMonitor labels
@@ -745,6 +784,12 @@ redis-ha:
   exporter:
     # -- If `true`, the prometheus exporter sidecar is enabled
     enabled: true
+    # -- Exporter image
+    # @default -- `nil` (follows subchart default)
+    image: ~
+    # -- Exporter tag
+    # @default -- `nil` (follows subchart default)
+    tag: ~
   persistentVolume:
     # -- Configures persistency on Redis nodes
     enabled: false
@@ -755,16 +800,53 @@ redis-ha:
     # @default -- See [values.yaml]
     config:
       # -- Will save the DB if both the given number of seconds and the given number of write operations against the DB occurred. `""`  is disabled
+      # @default -- `'""'`
       save: '""'
   haproxy:
     # -- Enabled HAProxy LoadBalancing/Proxy
     enabled: true
+    image:
+      # -- HAProxy Image Repository
+      # @default -- `nil` (follows subchart default)
+      repository: ~
+      # -- HAProxy Image Tag
+      # @default -- `nil` (follows subchart default)
+      tag: ~
     metrics:
       # -- HAProxy enable prometheus metric scraping
       enabled: true
   image:
+    # -- Redis image repository
+    # @default -- `nil` (follows subchart default)
+    repository: ~
     # -- Redis tag
     tag: 6.2.6-alpine
+
+  ## https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  topologySpreadConstraints:
+    # -- Enable Redis HA topology spread constraints
+    enabled: false
+    # -- Max skew of pods tolerated
+    # @default -- `""` (defaults to `1`)
+    maxSkew: ""
+    # -- Topology key for spread
+    # @default -- `""` (defaults to `topology.kubernetes.io/zone`)
+    topologyKey: ""
+    # -- Enforcement policy, hard or soft
+    # @default -- `""` (defaults to `ScheduleAnyway`)
+    whenUnsatisfiable: ""
+
+# External Redis parameters
+externalRedis:
+  # -- External Redis server host
+  host: ""
+  # -- External Redis password
+  password: ""
+  # -- External Redis server port
+  port: 6379
+  # -- The name of an existing secret with Redis credentials (must contain key `redis-password`).
+  # When it's set, the `externalRedis.password` parameter is ignored
+  existingSecret: ""
 
 ## Server
 server:
@@ -866,6 +948,21 @@ server:
   # -- Additional volumes to the server pod
   volumes: []
 
+  # -- [Node selector]
+  nodeSelector: {}
+  # -- [Tolerations] for use with node taints
+  tolerations: []
+  # -- Assign custom [affinity] rules to the deployment
+  affinity: {}
+
+  # -- Assign custom [TopologySpreadConstraints] rules to the Argo CD server
+  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
+  ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
+  topologySpreadConstraints: []
+  # - maxSkew: 1
+  #   topologyKey: topology.kubernetes.io/zone
+  #   whenUnsatisfiable: DoNotSchedule
+
   # -- Priority class for the Argo CD server
   priorityClassName: ""
 
@@ -899,8 +996,8 @@ server:
     annotations: {}
 
     externaldns:
-      enabled: true 
-    
+      enabled: true
+
     # -- Server service labels
     labels: {}
     # -- Server service type
@@ -943,6 +1040,8 @@ server:
       labels: {}
       # -- Metrics service port
       servicePort: 8083
+      # -- Metrics service port name
+      portName: http-metrics
     serviceMonitor:
       # -- Enable a prometheus ServiceMonitor
       enabled: false
@@ -956,6 +1055,10 @@ server:
       selector: {}
         # prometheus: kube-prometheus
 
+      # -- Prometheus ServiceMonitor scheme
+      scheme: ""
+      # -- Prometheus ServiceMonitor tlsConfig
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
       namespace: ""  # monitoring
       # -- Prometheus ServiceMonitor labels
@@ -1124,9 +1227,9 @@ server:
         - VirtualServer
         clusters:
         - https://10.135.192.1:443
-      
+
     # Argo CD's externally facing base URL (optional). Required when configuring SSO
-    url: https://argocd.example.com
+    url: ""
     # Argo CD instance label key
     application.instanceLabelKey: argocd.argoproj.io/instance
 
@@ -1540,6 +1643,8 @@ repoServer:
       labels: {}
       # -- Metrics service port
       servicePort: 8084
+      # -- Metrics service port name
+      portName: http-metrics
     serviceMonitor:
       # -- Enable a prometheus ServiceMonitor
       enabled: false
@@ -1553,6 +1658,10 @@ repoServer:
       selector: {}
         # prometheus: kube-prometheus
 
+      # -- Prometheus ServiceMonitor scheme
+      scheme: ""
+      # -- Prometheus ServiceMonitor tlsConfig
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
       namespace: "" # "monitoring"
       # -- Prometheus ServiceMonitor labels
@@ -1863,10 +1972,11 @@ applicationSet:
   image:
     # -- Repository to use for the application set controller
     repository: quay.io/argoproj/argocd-applicationset
-    # -- Image pull policy for the application set controller
-    pullPolicy: IfNotPresent
     # -- Tag to use for the application set controller
     tag: "v0.4.1"
+    # -- Image pull policy for the application set controller
+    # @default -- `""` (defaults to global.image.imagePullPolicy)
+    imagePullPolicy: ""
 
   args:
     # -- The default metric address
@@ -1885,7 +1995,7 @@ applicationSet:
   # -- Additional containers to be added to the applicationset controller pod
   extraContainers: []
 
-    ## Metrics service configuration
+  ## Metrics service configuration
   metrics:
     # -- Deploy metrics service
     enabled: false
@@ -1896,6 +2006,8 @@ applicationSet:
       labels: {}
       # -- Metrics service port
       servicePort: 8085
+      # -- Metrics service port name
+      portName: http-metrics
     serviceMonitor:
       # -- Enable a prometheus ServiceMonitor
       enabled: false
@@ -1909,6 +2021,10 @@ applicationSet:
       selector: {}
         # prometheus: kube-prometheus
 
+      # -- Prometheus ServiceMonitor scheme
+      scheme: ""
+      # -- Prometheus ServiceMonitor tlsConfig
+      tlsConfig: {}
       # -- Prometheus ServiceMonitor namespace
       namespace: ""  # monitoring
       # -- Prometheus ServiceMonitor labels
@@ -2153,6 +2269,8 @@ notifications:
       annotations: {}
       # -- Metrics service labels
       labels: {}
+      # -- Metrics service port name
+      portName: http-metrics
     serviceMonitor:
       # -- Enable a prometheus ServiceMonitor
       enabled: false
@@ -2164,13 +2282,17 @@ notifications:
       # namespace: monitoring
       # interval: 30s
       # scrapeTimeout: 10s
+      # -- Prometheus ServiceMonitor scheme
+      scheme: ""
+      # -- Prometheus ServiceMonitor tlsConfig
+      tlsConfig: {}
 
-  # -- Configures notification services
+  # -- Configures notification services such as slack, email or custom webhook
   # @default -- See [values.yaml]
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/services/overview/
-  notifiers:
-    service.slack: |
-      token: $slack-token
+  notifiers: {}
+    # service.slack: |
+    #   token: $slack-token
 
   # -- Annotations to be applied to the controller Pods
   podAnnotations: {}
@@ -2215,7 +2337,7 @@ notifications:
 
   # -- Contains centrally managed global application subscriptions
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/subscriptions/
-  subscriptions: {}
+  subscriptions: []
     # # subscription for on-sync-status-unknown trigger notifications
     # - recipients:
     #   - slack:test2
@@ -2418,7 +2540,33 @@ notifications:
     #     {{if eq .serviceType "slack"}}:white_check_mark:{{end}} Application {{.app.metadata.name}} has been successfully synced at {{.app.status.operationState.finishedAt}}.
     #     Sync operation details are available at: {{.context.argocdUrl}}/applications/{{.app.metadata.name}}?operation=true .
     #   slack:
-    #     attachments: "[{\n  \"title\": \"{{ .app.metadata.name}}\",\n  \"title_link\":\"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}\",\n  \"color\": \"#18be52\",\n  \"fields\": [\n  {\n    \"title\": \"Sync Status\",\n    \"value\": \"{{.app.status.sync.status}}\",\n    \"short\": true\n  },\n  {\n    \"title\": \"Repository\",\n    \"value\": \"{{.app.spec.source.repoURL}}\",\n    \"short\": true\n  }\n  {{range $index, $c := .app.status.conditions}}\n  {{if not $index}},{{end}}\n  {{if $index}},{{end}}\n  {\n    \"title\": \"{{$c.type}}\",\n    \"value\": \"{{$c.message}}\",\n    \"short\": true\n  }\n  {{end}}\n  ]\n}]    "
+    #     attachments: |-
+    #       [{
+    #         "title": "{{ .app.metadata.name}}",
+    #         "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
+    #         "color": "#18be52",
+    #         "fields": [
+    #         {
+    #           "title": "Sync Status",
+    #           "value": "{{.app.status.sync.status}}",
+    #           "short": true
+    #         },
+    #         {
+    #           "title": "Repository",
+    #           "value": "{{.app.spec.source.repoURL}}",
+    #           "short": true
+    #         }
+    #         {{range $index, $c := .app.status.conditions}}
+    #         {{if not $index}},{{end}}
+    #         {{if $index}},{{end}}
+    #         {
+    #           "title": "{{$c.type}}",
+    #           "value": "{{$c.message}}",
+    #           "short": true
+    #         }
+    #         {{end}}
+    #         ]
+    #       }]
 
   # -- [Tolerations] for use with node taints
   tolerations:

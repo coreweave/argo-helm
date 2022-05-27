@@ -13,6 +13,7 @@ spec:
       app.kubernetes.io/component: {{ .Values.dashboard.component }}
   strategy:
     type: Recreate
+  replicas: {{ .Values.dashboard.replicas }}
   template:
     metadata:
       {{- with .Values.podAnnotations }}
@@ -59,5 +60,8 @@ spec:
       {{- if .Values.dashboard.affinity }}
       affinity:
         {{- toYaml .Values.dashboard.affinity | nindent 8 }}
+      {{- end }}
+      {{- with .Values.dashboard.priorityClassName }}
+      priorityClassName: {{ . }}
       {{- end }}
 {{- end }}

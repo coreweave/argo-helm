@@ -37,10 +37,16 @@ jobs:
         run: ct lint --debug --config ./.github/configs/ct-lint.yaml --lint-conf ./.github/configs/lintconf.yaml
       
       - name: Run docs-testing (helm-docs)
-        uses: buttahtoast/helm-release-action@v2.0.1
-        with:
-          charts: "${{ steps.list-changed.outputs.changed_charts }}"
-        if: steps.list-changed.outputs.changed == 'true'
+        id: helm-docs
+        run: |
+          ./scripts/helm-docs.sh
+          if [[ $(git diff --stat) != '' ]]; then
+            echo -e '\033[0;31mDocumentation outdated!\033[0m ❌'
+            git diff --color
+            exit 1
+          else
+            echo -e '\033[0;32mDocumentation up to date\033[0m ✔'
+          fi
 
       - name: Create kind cluster
         uses: helm/kind-action@v1.2.0
@@ -50,9 +56,7 @@ jobs:
 
       - name: Deploy latest ArgoCD CRDs when testing ArgoCD extensions
         if: |
-          contains(steps.list-changed.outputs.changed_charts, 'argocd-applicationset') ||
-          contains(steps.list-changed.outputs.changed_charts, 'argocd-image-updater') ||
-          contains(steps.list-changed.outputs.changed_charts, 'argocd-notifications')
+          contains(steps.list-changed.outputs.changed_charts, 'argocd-image-updater')
         run: |
           kubectl apply -f charts/argo-cd/crds
 
@@ -61,6 +65,13 @@ jobs:
         run: |
           ## Metrics API not available in kind cluster
           rm charts/argo-cd/ci/ha-autoscaling-values.yaml
+
+      - name: Create an external redis for ArgoCD externalRedis feature
+        if: contains(steps.list-changed.outputs.changed_charts, 'argo-cd')
+        run: |
+          kubectl create namespace redis
+          helm repo add bitnami https://charts.bitnami.com/bitnami
+          helm install redis bitnami/redis --wait --namespace redis --set auth.password=argocd --set architecture=standalone
 
       - name: Run chart-testing (install)
         run: ct install --config ./.github/configs/ct-install.yaml

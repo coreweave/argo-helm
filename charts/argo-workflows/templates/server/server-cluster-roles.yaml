@@ -54,6 +54,7 @@ rules:
   verbs:
   - get
   - list
+  - watch
     {{- end }}
   {{- end }}
 - apiGroups:
@@ -62,6 +63,8 @@ rules:
   - secrets
   verbs:
   - get
+  - list
+  - watch
 {{- if .Values.server.sso }}
   {{- if .Values.server.sso.rbac }}
     {{- with .Values.server.sso.rbac.secretWhitelist }}
