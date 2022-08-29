@@ -6,7 +6,6 @@
             "form": false,
             "enum": [
                 "ORD1",
-                "EWR1",
                 "LAS1",
                 "LGA1"
             ],
