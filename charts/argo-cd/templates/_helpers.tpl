@@ -304,24 +304,24 @@ affinity:
                 - cpu
 {{- end -}}
 {{- define "coreweave.tolerations" -}}
-{{ if .Values.tolerations }}
+{{- if .Values.tolerations }}
 {{- with .Values.tolerations }}
 tolerations:
 {{- toYaml . | nindent 2 }}
 {{- end }}
-{{ else }}
+{{- else }}
 tolerations:
   - key: is_cpu_compute
     operator: Exists
-{{ end }}
+{{- end }}
 {{- end -}}
 {{- define "coreweave.affinity" -}}
-{{ if .Values.affinity }}
+{{- if .Values.affinity }}
 {{- with .Values.affinity }}
 affinity:
 {{- toYaml . | nindent 2 }}
 {{- end }}
-{{ else }}
+{{- else }}
 affinity:
   nodeAffinity:
     requiredDuringSchedulingIgnoredDuringExecution:
@@ -335,7 +335,7 @@ affinity:
               operator: In
               values:
                 - cpu
-{{ end }}
+{{- end }}
 {{- end -}}
 {{- define "coreweave.certSecretName" -}}
 {{printf "%s-tls-cert" .Release.Name }}
