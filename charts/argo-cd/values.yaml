@@ -9,6 +9,7 @@ customExternalDnsName: ''
 # -- Provide the annotation value for your ingress controller you wish to use.
 customIngressControllerClassAnnotation: ''
 
+enableSSL: false
 ## Argo CD configuration
 ## Ref: https://github.com/argoproj/argo-cd
 ##
@@ -883,7 +884,7 @@ server:
   ## Certificate configuration
   certificate:
     # -- Enables a certificate manager certificate
-    enabled: true
+    enabled: false
     # -- Certificate manager additional hosts
     additionalHosts: []
 
