@@ -279,11 +279,11 @@ Create the name of the configmap to use
     Create Hostname helper -- Coreweave Use Only
 */}}
 {{- define "coreweave.externalDnsName" -}}
-{{- if .Values.fullnameOverride }}
-{{ default (printf "%s.%s.ord1.ingress.coreweave.cloud" .Values.fullnameOverride .Release.Namespace) .Values.customExternalDnsName }}
-{{- else }}
-{{ default (printf "argocd.%s.ord1.ingress.coreweave.cloud" .Release.Namespace) .Values.customExternalDnsName }}
-{{- end }}
+{{- if .Values.fullnameOverride -}}
+{{ default (printf "%s.%s.%s.ingress.coreweave.cloud" .Values.fullnameOverride .Release.Namespace (.Values.region | lower | toString)) .Values.customExternalDnsName }}
+{{- else -}}
+{{ default (printf "%s.%s.ord1.ingress.coreweave.cloud" .Release.Name .Release.Namespace) .Values.customExternalDnsName }}
+{{- end -}}
 {{- end -}}
 
 {{/*
