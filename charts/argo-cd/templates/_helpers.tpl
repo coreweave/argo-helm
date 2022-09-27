@@ -282,7 +282,7 @@ Create the name of the configmap to use
 {{- if .Values.fullnameOverride -}}
 {{ default (printf "%s.%s.%s.ingress.coreweave.cloud" .Values.fullnameOverride .Release.Namespace (.Values.region | lower | toString)) .Values.customExternalDnsName }}
 {{- else -}}
-{{ default (printf "%s.%s.ord1.ingress.coreweave.cloud" .Release.Name .Release.Namespace) .Values.customExternalDnsName }}
+{{ default (printf "%s.%s.%s.ingress.coreweave.cloud" .Release.Name .Release.Namespace (.Values.region | lower | toString)) .Values.customExternalDnsName }}
 {{- end -}}
 {{- end -}}
 
