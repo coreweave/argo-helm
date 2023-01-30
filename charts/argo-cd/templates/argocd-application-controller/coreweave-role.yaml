@@ -199,6 +199,12 @@ rules:
     verbs:
       - '*'
   - apiGroups:
+      - acme.cert-manager.io
+    resources:
+      - orders
+    verbs:
+      - '*'
+  - apiGroups:
       - metrics.k8s.io
     resources:
       - pods
