@@ -1058,8 +1058,6 @@ server:
         - "apps.kruise.io"
         kinds:
         - CloneSet
-        - BroadcastJob
-        - WorkloadSpread
         clusters:
         - https://10.135.192.1:443
         - https://kubernetes.default.svc
