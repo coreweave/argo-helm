@@ -3,6 +3,7 @@ kind: Service
 metadata:
   {{- if .Values.server.service.annotations }}
   annotations:
+    external-dns.alpha.kubernetes.io/hostname: {{ .Release.Name }}.{{ .Release.Namespace }}.coreweave.cloud
   {{- range $key, $value := .Values.server.service.annotations }}
     {{ $key }}: {{ $value | quote }}
   {{- end }}
