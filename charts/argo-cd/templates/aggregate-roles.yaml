@@ -11,6 +11,12 @@ rules:
   - argoproj.io
   resources:
   - applications
+  {{- if .Values.applicationSet.enabled }}
+  - applicationsets
+  {{- end }}
+  {{- if .Values.server.extensions.enabled }}
+  - argocdextensions
+  {{- end }}
   - appprojects
   verbs:
   - get
@@ -30,6 +36,12 @@ rules:
   - argoproj.io
   resources:
   - applications
+  {{- if .Values.applicationSet.enabled }}
+  - applicationsets
+  {{- end }}
+  {{- if .Values.server.extensions.enabled }}
+  - argocdextensions
+  {{- end }}
   - appprojects
   verbs:
   - create
@@ -54,6 +66,12 @@ rules:
   - argoproj.io
   resources:
   - applications
+  {{- if .Values.applicationSet.enabled }}
+  - applicationsets
+  {{- end }}
+  {{- if .Values.server.extensions.enabled }}
+  - argocdextensions
+  {{- end }}
   - appprojects
   verbs:
   - create

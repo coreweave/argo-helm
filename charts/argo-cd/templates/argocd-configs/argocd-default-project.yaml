@@ -1,0 +1,17 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: {{.Release.Name}}-default
+  namespace: {{ .Release.Namespace }}
+spec:
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  destinations:
+  - namespace: {{ .Release.Namespace }}
+    name: "cw"
+    server: "https://kubernetes.default.svc"
+  sourceNamespace:
+  - {{.Release.Namespace}}
+  sourceRepos:
+  - '*'
