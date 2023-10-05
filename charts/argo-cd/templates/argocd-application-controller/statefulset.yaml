@@ -290,18 +290,8 @@ spec:
       initContainers:
         {{- tpl (toYaml .) $ | nindent 6 }}
       {{- end }}
-      {{- with include "argo-cd.affinity" (dict "context" . "component" .Values.controller) }}
-      affinity:
-        {{- trim . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.controller.nodeSelector | default .Values.global.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.controller.tolerations | default .Values.global.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{include "coreweave.affinity" . | nindent 6 }}
+      {{include "coreweave.tolerations" . | nindent 6 }}
       {{- with .Values.controller.topologySpreadConstraints | default .Values.global.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- range $constraint := . }}

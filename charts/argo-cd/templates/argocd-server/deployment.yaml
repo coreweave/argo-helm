@@ -60,6 +60,7 @@ spec:
         imagePullPolicy: {{ default .Values.global.image.imagePullPolicy .Values.server.image.imagePullPolicy }}
         args:
         - /usr/local/bin/argocd-server
+        - --insecure 
         - --port={{ .Values.server.containerPorts.server }}
         - --metrics-port={{ .Values.server.containerPorts.metrics }}
         {{- with .Values.server.logFormat }}
@@ -377,18 +378,8 @@ spec:
       initContainers:
         {{- tpl (toYaml .) $ | nindent 6 }}
       {{- end }}
-      {{- with include "argo-cd.affinity" (dict "context" . "component" .Values.server) }}
-      affinity:
-        {{- trim . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.server.nodeSelector | default .Values.global.nodeSelector }}
-      nodeSelector:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
-      {{- with .Values.server.tolerations | default .Values.global.tolerations }}
-      tolerations:
-        {{- toYaml . | nindent 8 }}
-      {{- end }}
+      {{include "coreweave.affinity" . | nindent 6 }}
+      {{include "coreweave.tolerations" . | nindent 6 }}
       {{- with .Values.server.topologySpreadConstraints | default .Values.global.topologySpreadConstraints }}
       topologySpreadConstraints:
         {{- range $constraint := . }}

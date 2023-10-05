@@ -13,10 +13,10 @@ metadata:
   labels:
     {{- include "argo-cd.labels" (dict "context" . "component" .Values.server.name "name" .Values.server.name) | nindent 4 }}
 spec:
-  secretName: {{ .Values.server.certificate.secretName }}
-  commonName: {{ .Values.server.certificate.domain | quote }}
+  secretName: {{ include "coreweave.certSecretName" . | quote }}
+  commonName: {{ (include "coreweave.externalDnsName" .) | quote }}
   dnsNames:
-    - {{ .Values.server.certificate.domain | quote }}
+    - {{ (include "coreweave.externalDnsName" . ) | quote }}
     {{- range .Values.server.certificate.additionalHosts }}
     - {{ . | quote }}
     {{- end }}
@@ -30,8 +30,8 @@ spec:
     {{- with .Values.server.certificate.issuer.group }}
     group: {{ . | quote }}
     {{- end }}
-    kind: {{ .Values.server.certificate.issuer.kind | quote }}
-    name: {{ .Values.server.certificate.issuer.name | quote }}
+    kind: {{ default "ClusterIssuer" (.Values.server.certificate.issuer.kind | quote) }}
+    name: {{ default "letsencrypt-prod" (.Values.server.certificate.issuer.name | quote) }}
   {{- with .Values.server.certificate.privateKey }}
   privateKey:
     {{- toYaml . | nindent 4 }}

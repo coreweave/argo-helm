@@ -1,3 +1,14 @@
+## CoreWeave Custom Options
+region: ORD1
+
+affinity: {}
+tolerations: []
+
+# -- Provide a custom dns name in place of coreweave's ingress. Requires custom Ingress Controller
+customExternalDnsName: ''
+# -- Provide the annotation value for your ingress controller you wish to use.
+customIngressControllerClassAnnotation: ''
+
 ## Argo CD configuration
 ## Ref: https://github.com/argoproj/argo-cd
 ##
@@ -20,7 +31,7 @@ apiVersionOverrides:
 createAggregateRoles: false
 # -- Create cluster roles for cluster-wide installation.
 ## Used when you manage applications in the same cluster where Argo CD runs
-createClusterRoles: true
+createClusterRoles: false
 
 openshift:
   # -- enables using arbitrary uid for argo repo server
@@ -29,7 +40,7 @@ openshift:
 ## Custom resource configuration
 crds:
   # -- Install and upgrade CRDs
-  install: true
+  install: false
   # -- Keep CRDs on chart uninstall
   keep: true
   # -- Annotations to be added to all CRDs
@@ -159,6 +170,93 @@ configs:
 
     # -- Argo CD's externally facing base URL (optional). Required when configuring SSO
     url: ""
+
+    resource.inclusions: |
+      - apiGroups:
+        - "apps.kruise.io"
+        kinds:
+        - CloneSet
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "kubeflow.org"
+        kinds:
+        - MPIJob
+        - TFJob
+        - MXJob
+        - PyTorchJob
+        - XGBoostJob
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "networking.k8s.io"
+        kinds:
+        - Ingress
+        - NetworkPolicy
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "cert-manager.io"
+        kinds:
+        - Certificate
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "*"
+        kinds:
+        - Deployment
+        - Pod
+        - ConfigMap
+        - Event
+        - LimitRange
+        - PersistentVolumeClaim
+        - PodTemplate
+        - ReplicationController
+        - Service
+        - Secret
+        - Endpoint
+        - ControllerRevision
+        - Application
+        - PodDisruptionBudget
+        - ServiceAccount
+        - StatefulSet
+        - SealedSecret
+        - Workflow
+        - WorkflowTemplate
+        - CronWorkflow
+        - AppProject
+        - Role
+        - RoleBinding
+        - InferenceService
+        - Revision
+        - PodAutoscaler
+        - Virtualservice
+        - HorizontalPodAutoscaler
+        - Batch
+        - Extention
+        - Job
+        - CronJob
+        - ResourceQuota
+        - IngressRoute
+        - IngressRouteTcp
+        - IngressRouteUdp
+        - Middleware
+        - TlsOption
+        - TlsStore
+        - TraefikService
+        - DataVolume
+        - ScaledObject
+        - Issuer
+        - CertificateRequest
+        - ServiceMonitor
+        - VirtualServer
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
 
     # -- The name of tracking label used by Argo CD for resource pruning
     # @default -- Defaults to app.kubernetes.io/instance
@@ -614,12 +712,12 @@ controller:
   imagePullSecrets: []
 
   # -- DEPRECATED - Application controller commandline flags
-  args: {}
+  args:
   # DEPRECATED - Use configs.params to override
   #  # -- define the application controller `--status-processors`
-  #  statusProcessors: "20"
+   statusProcessors: "50"
   #  # -- define the application controller `--operation-processors`
-  #  operationProcessors: "10"
+   operationProcessors: "25"
   #  # -- define the application controller `--app-hard-resync`
   #  appHardResyncPeriod: "0"
   #  # -- define the application controller `--app-resync`
@@ -627,7 +725,7 @@ controller:
   #  # -- define the application controller `--self-heal-timeout-seconds`
   #  selfHealTimeout: "5"
   #  # -- define the application controller `--repo-server-timeout-seconds`
-  #  repoServerTimeoutSeconds: "60"
+   repoServerTimeoutSeconds: "500"
 
   # -- Additional command line arguments to pass to application controller
   extraArgs: []
@@ -684,13 +782,13 @@ controller:
   podLabels: {}
 
   # -- Resource limits and requests for the application controller pods
-  resources: {}
-  #  limits:
-  #    cpu: 500m
-  #    memory: 512Mi
-  #  requests:
-  #    cpu: 250m
-  #    memory: 256Mi
+  resources:
+   limits:
+     cpu: 1000m
+     memory: 512Mi
+   requests:
+     cpu: 500m
+     memory: 256Mi
 
   # Application controller container ports
   containerPorts:
@@ -734,18 +832,6 @@ controller:
   # -- Priority class for the application controller pods
   # @default -- `""` (defaults to global.priorityClassName)
   priorityClassName: ""
-
-  # -- [Node selector]
-  # @default -- `{}` (defaults to global.nodeSelector)
-  nodeSelector: {}
-
-  # -- [Tolerations] for use with node taints
-  # @default -- `[]` (defaults to global.tolerations)
-  tolerations: []
-
-  # -- Assign custom [affinity] rules to the deployment
-  # @default -- `{}` (defaults to global.affinity preset)
-  affinity: {}
 
   # -- Assign custom [TopologySpreadConstraints] rules to the application controller
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
@@ -949,13 +1035,13 @@ dex:
     imagePullPolicy: ""
     # -- Argo CD init image resources
     # @default -- `{}` (defaults to dex.resources)
-    resources: {}
-    #  requests:
-    #    cpu: 5m
-    #    memory: 96Mi
-    #  limits:
-    #    cpu: 10m
-    #    memory: 144Mi
+    resources:
+     requests:
+       cpu: 5m
+       memory: 96Mi
+     limits:
+       cpu: 10m
+       memory: 144Mi
 
   # -- Environment variables to pass to the Dex server
   env: []
@@ -1009,13 +1095,13 @@ dex:
   podLabels: {}
 
   # -- Resource limits and requests for dex
-  resources: {}
-  #  limits:
-  #    cpu: 50m
-  #    memory: 64Mi
-  #  requests:
-  #    cpu: 10m
-  #    memory: 32Mi
+  resources:
+   limits:
+     cpu: 500m
+     memory: 64Mi
+   requests:
+     cpu: 100m
+     memory: 32Mi
 
   # Dex container ports
   # NOTE: These ports are currently hardcoded and cannot be changed
@@ -1098,18 +1184,6 @@ dex:
   # -- Priority class for the dex pods
   # @default -- `""` (defaults to global.priorityClassName)
   priorityClassName: ""
-
-  # -- [Node selector]
-  # @default -- `{}` (defaults to global.nodeSelector)
-  nodeSelector: {}
-
-  # -- [Tolerations] for use with node taints
-  # @default -- `[]` (defaults to global.tolerations)
-  tolerations: []
-
-  # -- Assign custom [affinity] rules to the deployment
-  # @default -- `{}` (defaults to global.affinity preset)
-  affinity: {}
 
   # -- Assign custom [TopologySpreadConstraints] rules to dex
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
@@ -1196,13 +1270,13 @@ redis:
         - ALL
 
     # -- Resource limits and requests for redis-exporter sidecar
-    resources: {}
-      # limits:
-      #   cpu: 50m
-      #   memory: 64Mi
-      # requests:
-      #   cpu: 10m
-      #   memory: 32Mi
+    resources:
+      limits:
+        cpu: 50m
+        memory: 64Mi
+      requests:
+        cpu: 10m
+        memory: 32Mi
 
   # -- Secrets with credentials to pull images from a private registry
   # @default -- `[]` (defaults to global.imagePullSecrets)
@@ -1248,13 +1322,13 @@ redis:
   podLabels: {}
 
   # -- Resource limits and requests for redis
-  resources: {}
-  #  limits:
-  #    cpu: 200m
-  #    memory: 128Mi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 64Mi
+  resources:
+   limits:
+     cpu: 200m
+     memory: 128Mi
+   requests:
+     cpu: 100m
+     memory: 64Mi
 
   # -- Redis pod-level security context
   # @default -- See [values.yaml]
@@ -1291,18 +1365,6 @@ redis:
   # -- Priority class for redis pods
   # @default -- `""` (defaults to global.priorityClassName)
   priorityClassName: ""
-
-  # -- [Node selector]
-  # @default -- `{}` (defaults to global.nodeSelector)
-  nodeSelector: {}
-
-  # -- [Tolerations] for use with node taints
-  # @default -- `[]` (defaults to global.tolerations)
-  tolerations: []
-
-  # -- Assign custom [affinity] rules to the deployment
-  # @default -- `{}` (defaults to global.affinity preset)
-  affinity: {}
 
   # -- Assign custom [TopologySpreadConstraints] rules to redis
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
@@ -1589,13 +1651,13 @@ server:
         - ALL
 
     # -- Resource limits and requests for the argocd-extensions container
-    resources: {}
-    #  limits:
-    #    cpu: 50m
-    #    memory: 128Mi
-    #  requests:
-    #    cpu: 10m
-    #    memory: 64Mi
+    resources:
+     limits:
+       cpu: 50m
+       memory: 128Mi
+     requests:
+       cpu: 10m
+       memory: 64Mi
 
   # -- Additional containers to be added to the server pod
   ## Note: Supports use of custom Helm templates
@@ -1657,13 +1719,13 @@ server:
   podLabels: {}
 
   # -- Resource limits and requests for the Argo CD server
-  resources: {}
-  #  limits:
-  #    cpu: 100m
-  #    memory: 128Mi
-  #  requests:
-  #    cpu: 50m
-  #    memory: 64Mi
+  resources:
+   limits:
+     cpu: 2000m
+     memory: 1000Mi
+   requests:
+     cpu: 1000m
+     memory: 1000Mi
 
   # Server container ports
   containerPorts:
@@ -1722,18 +1784,6 @@ server:
   # @default -- `""` (defaults to global.priorityClassName)
   priorityClassName: ""
 
-  # -- [Node selector]
-  # @default -- `{}` (defaults to global.nodeSelector)
-  nodeSelector: {}
-
-  # -- [Tolerations] for use with node taints
-  # @default -- `[]` (defaults to global.tolerations)
-  tolerations: []
-
-  # -- Assign custom [affinity] rules to the deployment
-  # @default -- `{}` (defaults to global.affinity preset)
-  affinity: {}
-
   # -- Assign custom [TopologySpreadConstraints] rules to the Argo CD server
   # @default -- `[]` (defaults to global.topologySpreadConstraints)
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
@@ -1754,7 +1804,7 @@ server:
   ## Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/tls/#tls-certificates-used-by-argocd-server
   certificate:
     # -- Deploy a Certificate resource (requires cert-manager)
-    enabled: false
+    enabled: true
     # -- The name of the Secret that will be automatically created and managed by this Certificate resource
     secretName: argocd-server-tls
     # -- Certificate primary domain (commonName)
@@ -1775,9 +1825,9 @@ server:
       # -- Certificate issuer group. Set if using an external issuer. Eg. `cert-manager.io`
       group: ""
       # -- Certificate issuer kind. Either `Issuer` or `ClusterIssuer`
-      kind: ""
+      kind: "ClusterIssuer"
       # -- Certificate issuer name. Eg. `letsencrypt`
-      name: ""
+      name: "letsencrypt-prod"
     # Private key of the certificate
     privateKey:
       # -- Rotation policy of private key when certificate is re-issued. Either: `Never` or `Always`
@@ -1893,47 +1943,6 @@ server:
     labels: {}
     # -- Automount API credentials for the Service Account
     automountServiceAccountToken: true
-
-  ingress:
-    # -- Enable an ingress resource for the Argo CD server
-    enabled: false
-    # -- Additional ingress annotations
-    annotations: {}
-    # -- Additional ingress labels
-    labels: {}
-    # -- Defines which ingress controller will implement the resource
-    ingressClassName: ""
-
-    # -- List of ingress hosts
-    ## Argo Ingress.
-    ## Hostnames must be provided if Ingress is enabled.
-    ## Secrets must be manually created in the namespace
-    hosts: []
-      # - argocd.example.com
-
-    # -- List of ingress paths
-    paths:
-      - /
-    # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
-    pathType: Prefix
-    # -- Additional ingress paths
-    extraPaths: []
-      # - path: /*
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: ssl-redirect
-      #       port:
-      #         name: use-annotation
-
-    # -- Ingress TLS configuration
-    tls: []
-      # - secretName: your-certificate-name
-      #   hosts:
-      #     - argocd.example.com
-
-    # -- Uses `server.service.servicePortHttps` instead `server.service.servicePortHttp`
-    https: false
 
   # dedicated ingress for gRPC as documented at
   # Ref: https://argo-cd.readthedocs.io/en/stable/operator-manual/ingress/
@@ -2200,13 +2209,13 @@ repoServer:
   podLabels: {}
 
   # -- Resource limits and requests for the repo server pods
-  resources: {}
-  #  limits:
-  #    cpu: 50m
-  #    memory: 128Mi
-  #  requests:
-  #    cpu: 10m
-  #    memory: 64Mi
+  resources:
+   limits:
+     cpu: 4000m
+     memory: 4Gi
+   requests:
+     cpu: 1000m
+     memory: 4Gi
 
   # Repo server container ports
   containerPorts:
@@ -2399,7 +2408,7 @@ repoServer:
 ## ApplicationSet controller
 applicationSet:
   # -- Enable ApplicationSet controller
-  enabled: true
+  enabled: false
 
   # -- ApplicationSet controller name string
   name: applicationset-controller
@@ -2554,13 +2563,13 @@ applicationSet:
   podLabels: {}
 
   # -- Resource limits and requests for the ApplicationSet controller pods.
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
   # ApplicationSet controller container ports
   containerPorts:
@@ -2734,7 +2743,6 @@ applicationSet:
       # -- Key bit size of the private key. If algorithm is set to `Ed25519`, size is ignored.
       size: 2048
     # -- Annotations to be applied to the ApplicationSet Certificate
-    annotations: {}
 
 ## Notifications controller
 notifications:
@@ -2901,13 +2909,13 @@ notifications:
   podLabels: {}
 
   # -- Resource limits and requests for the notifications controller
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
 
   # Notification controller container ports
   containerPorts:
@@ -2971,6 +2979,11 @@ notifications:
     labels: {}
     # -- Automount API credentials for the Service Account
     automountServiceAccountToken: true
+
+  ingress:
+    enabled: true
+    externaldns:
+      enabled: true
 
   cm:
     # -- Whether helm chart creates notifications controller config map
