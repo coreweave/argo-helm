@@ -241,7 +241,11 @@ Merge Argo Configuration with Preset Configuration
 {{- toYaml (mergeOverwrite (default dict (fromYaml (include "argo-cd.config.presets" $))) .Values.server.config) }}
   {{- end -}}
 {{- end -}}
-
+{{- define "coreweave.config" -}}
+  {{- if .Values.server.configEnabled -}}
+{{- toYaml (mergeOverwrite (default dict (fromYaml (include "argo-cd.config" $))) .Values.server.exclusions) }}
+    {{- end -}}
+{{- end -}}
 {{/*
 Return the default Argo CD app version
 */}}
@@ -269,4 +273,74 @@ Create the name of the configmap to use
 {{- else -}}
     {{ default "argocd-notifications-cm" .Values.notifications.cm.name }}
 {{- end -}}
+{{- end -}}
+
+{{/* 
+    Create Hostname helper -- Coreweave Use Only
+*/}}
+{{- define "coreweave.externalDnsName" -}}
+{{- if .Values.fullnameOverride -}}
+{{ default (printf "%s.%s.%s.ingress.coreweave.cloud" .Values.fullnameOverride .Release.Namespace (.Values.region | lower | toString)) .Values.customExternalDnsName }}
+{{- else -}}
+{{ default (printf "%s.%s.%s.ingress.coreweave.cloud" .Release.Name .Release.Namespace (.Values.region | lower | toString)) .Values.customExternalDnsName }}
+{{- end -}}
+{{- end -}}
+
+{{/*
+    Create DRY Helpers
+*/}}
+{{- define "coreweave.nodeAffinityAndTolerations" -}}
+tolerations:
+  - key: is_cpu_compute
+    operator: Exists
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: topology.kubernetes.io/region
+              operator: In
+              values:
+                - {{ .Values.region }}
+            - key: node.coreweave.cloud/class
+              operator: In
+              values:
+                - cpu
+{{- end -}}
+{{- define "coreweave.tolerations" -}}
+{{- if .Values.tolerations }}
+{{- with .Values.tolerations }}
+tolerations:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- else }}
+tolerations:
+  - key: is_cpu_compute
+    operator: Exists
+{{- end }}
+{{- end -}}
+{{- define "coreweave.affinity" -}}
+{{- if .Values.affinity }}
+{{- with .Values.affinity }}
+affinity:
+{{- toYaml . | nindent 2 }}
+{{- end }}
+{{- else }}
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+        - matchExpressions:
+            - key: topology.kubernetes.io/region
+              operator: In
+              values:
+                - {{ .Values.region }}
+            - key: node.coreweave.cloud/class
+              operator: In
+              values:
+                - cpu
+{{- end }}
+{{- end -}}
+{{- define "coreweave.certSecretName" -}}
+{{printf "%s-tls-cert" .Release.Name }}
 {{- end -}}

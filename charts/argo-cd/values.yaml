@@ -1,7 +1,17 @@
+## CoreWeave Custom Options
+region: ORD1
+
+affinity: {}
+tolerations: []
+
+# -- Provide a custom dns name in place of coreweave's ingress. Requires custom Ingress Controller
+customExternalDnsName: ''
+# -- Provide the annotation value for your ingress controller you wish to use.
+customIngressControllerClassAnnotation: ''
+
 ## Argo CD configuration
 ## Ref: https://github.com/argoproj/argo-cd
 ##
-
 # -- Provide a name in place of `argocd`
 nameOverride: argocd
 # -- String to fully override `"argo-cd.fullname"`
@@ -10,6 +20,8 @@ fullnameOverride: ""
 kubeVersionOverride: ""
 
 global:
+  skipCrds: true 
+
   image:
     # -- If defined, a repository applied to all Argo CD deployments
     repository: quay.io/argoproj/argocd
@@ -112,15 +124,15 @@ controller:
   ## Application controller commandline flags
   args:
     # -- define the application controller `--status-processors`
-    statusProcessors: "20"
+    statusProcessors: "50"
     # -- define the application controller `--operation-processors`
-    operationProcessors: "10"
+    operationProcessors: "25"
     # -- define the application controller `--app-resync`
     appResyncPeriod: "180"
     # -- define the application controller `--self-heal-timeout-seconds`
     selfHealTimeout: "5"
     # -- define the application controller `--repo-server-timeout-seconds`
-    repoServerTimeoutSeconds: "60"
+    repoServerTimeoutSeconds: "500"
 
   # -- Application controller log format. Either `text` or `json`
   logFormat: text
@@ -205,13 +217,6 @@ controller:
     # -- Application controller service port name
     portName: https-controller
 
-  # -- [Node selector]
-  nodeSelector: {}
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-  # -- Assign custom [affinity] rules to the deployment
-  affinity: {}
-
   # -- Assign custom [TopologySpreadConstraints] rules to the application controller
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
@@ -224,13 +229,13 @@ controller:
   priorityClassName: ""
 
   # -- Resource limits and requests for the application controller pods
-  resources: {}
-  #  limits:
-  #    cpu: 500m
-  #    memory: 512Mi
-  #  requests:
-  #    cpu: 250m
-  #    memory: 256Mi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 512Mi
+    requests:
+      cpu: 500m
+      memory: 256Mi
 
   serviceAccount:
     # -- Create a service account for the application controller
@@ -312,7 +317,7 @@ controller:
   ## Enable if you would like to grant rights to Argo CD to deploy to the local Kubernetes cluster.
   clusterAdminAccess:
     # -- Enable RBAC for local cluster deployments
-    enabled: true
+    enabled: false
 
   ## Enable this and set the rules: to whatever custom rules you want for the Cluster Role resource.
   ## Defaults to off
@@ -498,21 +503,6 @@ dex:
   # -- Service port for metrics access
   servicePortMetrics: 5558
 
-  # -- [Node selector]
-  nodeSelector: {}
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-  # -- Assign custom [affinity] rules to the deployment
-  affinity: {}
-
-  # -- Assign custom [TopologySpreadConstraints] rules to dex
-  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-  ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
-  # - maxSkew: 1
-  #   topologyKey: topology.kubernetes.io/zone
-  #   whenUnsatisfiable: DoNotSchedule
-
   # -- Priority class for dex
   priorityClassName: ""
 
@@ -525,13 +515,13 @@ dex:
     # readOnlyRootFilesystem: true
 
 # -- Resource limits and requests for dex
-  resources: {}
-  #  limits:
-  #    cpu: 50m
-  #    memory: 64Mi
-  #  requests:
-  #    cpu: 10m
-  #    memory: 32Mi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 64Mi
+    requests:
+      cpu: 100m
+      memory: 32Mi
 
   # -- Additional containers to be added to the dex pod
   extraContainers: []
@@ -605,13 +595,6 @@ redis:
   # -- Labels to be added to the Redis server pods
   podLabels: {}
 
-  # -- [Node selector]
-  nodeSelector: {}
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-  # -- Assign custom [affinity] rules to the deployment
-  affinity: {}
-
   # -- Assign custom [TopologySpreadConstraints] rules to redis
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
@@ -647,13 +630,13 @@ redis:
     automountServiceAccountToken: false
 
   # -- Resource limits and requests for redis
-  resources: {}
-  #  limits:
-  #    cpu: 200m
-  #    memory: 128Mi
-  #  requests:
-  #    cpu: 100m
-  #    memory: 64Mi
+  resources:
+    limits:
+      cpu: 200m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 64Mi
 
   # -- Additional volumeMounts to the redis container
   volumeMounts: []
@@ -698,13 +681,13 @@ redis:
     # -- Port to use for redis-exporter sidecar
     containerPort: 9121
     # -- Resource limits and requests for redis-exporter sidecar
-    resources: {}
-      # limits:
-      #   cpu: 50m
-      #   memory: 64Mi
-      # requests:
-      #   cpu: 10m
-      #   memory: 32Mi
+    resources:
+       limits:
+         cpu: 50m
+         memory: 64Mi
+       requests:
+         cpu: 10m
+         memory: 32Mi
     service:
       # -- Metrics service type
       type: ClusterIP
@@ -877,21 +860,6 @@ server:
   # -- Additional volumes to the server pod
   volumes: []
 
-  # -- [Node selector]
-  nodeSelector: {}
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-  # -- Assign custom [affinity] rules to the deployment
-  affinity: {}
-
-  # -- Assign custom [TopologySpreadConstraints] rules to the Argo CD server
-  ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
-  ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
-  topologySpreadConstraints: []
-  # - maxSkew: 1
-  #   topologyKey: topology.kubernetes.io/zone
-  #   whenUnsatisfiable: DoNotSchedule
-
   # -- Priority class for the Argo CD server
   priorityClassName: ""
 
@@ -904,34 +872,29 @@ server:
     # readOnlyRootFilesystem: true
 
   # -- Resource limits and requests for the Argo CD server
-  resources: {}
-  #  limits:
-  #    cpu: 100m
-  #    memory: 128Mi
-  #  requests:
-  #    cpu: 50m
-  #    memory: 64Mi
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 50m
+      memory: 64Mi
 
   ## Certificate configuration
   certificate:
     # -- Enables a certificate manager certificate
-    enabled: false
-    # -- Certificate manager domain
-    domain: argocd.example.com
-    issuer:
-      # -- Certificate manager issuer
-      kind: # ClusterIssuer
-      # -- Certificate manager name
-      name: # letsencrypt
+    enabled: true
     # -- Certificate manager additional hosts
     additionalHosts: []
-    # -- Certificate manager secret name
-    secretName: argocd-server-tls
 
   ## Server service configuration
   service:
     # -- Server service annotations
     annotations: {}
+
+    externaldns:
+      enabled: true 
+    
     # -- Server service labels
     labels: {}
     # -- Server service type
@@ -1001,55 +964,6 @@ server:
     annotations: {}
     # -- Automount API credentials for the Service Account
     automountServiceAccountToken: true
-
-  ingress:
-    # -- Enable an ingress resource for the Argo CD server
-    enabled: false
-    # -- Additional ingress annotations
-    annotations: {}
-    # -- Additional ingress labels
-    labels: {}
-    # -- Defines which ingress controller will implement the resource
-    ingressClassName: ""
-
-    # -- List of ingress hosts
-    ## Argo Ingress.
-    ## Hostnames must be provided if Ingress is enabled.
-    ## Secrets must be manually created in the namespace
-    hosts:
-      []
-      # - argocd.example.com
-
-    # -- List of ingress paths
-    paths:
-      - /
-    # -- Ingress path type. One of `Exact`, `Prefix` or `ImplementationSpecific`
-    pathType: Prefix
-    # -- Additional ingress paths
-    extraPaths:
-      []
-      # - path: /*
-      #   backend:
-      #     serviceName: ssl-redirect
-      #     servicePort: use-annotation
-      ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
-      # - path: /*
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: ssl-redirect
-      #       port:
-      #         name: use-annotation
-
-    # -- Ingress TLS configuration
-    tls:
-      []
-      # - secretName: argocd-tls-certificate
-      #   hosts:
-      #     - argocd.example.com
-
-    # -- Uses `server.service.servicePortHttps` instead `server.service.servicePortHttp`
-    https: false
 
   # dedicated ingress for gRPC as documented at
   # Ref: https://argoproj.github.io/argo-cd/operator-manual/ingress/
@@ -1139,6 +1053,94 @@ server:
   # -- [General Argo CD configuration]
   # @default -- See [values.yaml]
   config:
+    resource.inclusions: |
+      - apiGroups:
+        - "apps.kruise.io"
+        kinds:
+        - CloneSet
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "kubeflow.org"
+        kinds:
+        - MPIJob
+        - TFJob
+        - MXJob
+        - PyTorchJob
+        - XGBoostJob
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "networking.k8s.io"
+        kinds:
+        - Ingress
+        - NetworkPolicy
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "cert-manager.io"
+        kinds:
+        - Certificate
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+      - apiGroups:
+        - "*"
+        kinds:
+        - Deployment
+        - Pod
+        - ConfigMap
+        - Event
+        - LimitRange
+        - PersistentVolumeClaim
+        - PodTemplate
+        - ReplicationController
+        - Service
+        - Secret
+        - Endpoint
+        - ControllerRevision
+        - Application
+        - PodDisruptionBudget
+        - ServiceAccount
+        - StatefulSet
+        - SealedSecret
+        - Workflow
+        - WorkflowTemplate
+        - CronWorkflow
+        - AppProject
+        - Role
+        - RoleBinding
+        - InferenceService
+        - Revision
+        - PodAutoscaler
+        - Virtualservice
+        - HorizontalPodAutoscaler
+        - Batch
+        - Extention
+        - Job
+        - CronJob
+        - ResourceQuota
+        - IngressRoute
+        - IngressRouteTcp
+        - IngressRouteUdp
+        - Middleware
+        - TlsOption
+        - TlsStore
+        - TraefikService
+        - DataVolume
+        - ScaledObject
+        - Issuer
+        - CertificateRequest
+        - ServiceMonitor
+        - VirtualServer
+        clusters:
+        - https://10.135.192.1:443
+        - https://kubernetes.default.svc
+    
+
     # Argo CD's externally facing base URL (optional). Required when configuring SSO
     url: https://argocd.example.com
     # Argo CD instance label key
@@ -1283,7 +1285,7 @@ server:
   ## Enable if you would like to grant rights to Argo CD to deploy to the local Kubernetes cluster.
   clusterAdminAccess:
     # -- Enable RBAC for local cluster deployments
-    enabled: true
+    enabled: false
 
   GKEbackendConfig:
     # -- Enable BackendConfig custom resource for Google Kubernetes Engine
@@ -1494,13 +1496,6 @@ repoServer:
   #  - name: custom-tools
   #    emptyDir: {}
 
-  # -- [Node selector]
-  nodeSelector: {}
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-  # -- Assign custom [affinity] rules to the deployment
-  affinity: {}
-
   # -- Assign custom [TopologySpreadConstraints] rules to the repo server
   ## Ref: https://kubernetes.io/docs/concepts/workloads/pods/pod-topology-spread-constraints/
   ## If labelSelector is left out, it will default to the labelSelector configuration of the deployment
@@ -1521,13 +1516,13 @@ repoServer:
     # readOnlyRootFilesystem: true
 
   # -- Resource limits and requests for the repo server pods
-  resources: {}
-  #  limits:
-  #    cpu: 50m
-  #    memory: 128Mi
-  #  requests:
-  #    cpu: 10m
-  #    memory: 64Mi
+  resources:
+    limits:
+      cpu: 500m
+      memory: 2Gi
+    requests:
+      cpu: 500m
+      memory: 2Gi
 
   ## Repo server service configuration
   service:
@@ -1968,26 +1963,17 @@ applicationSet:
     # runAsUser: 1000
 
   # -- Resource limits and requests for the controller pods.
-  resources: {}
+  resources:
     # We usually recommend not to specify default resources and to leave this as a conscious
     # choice for the user. This also increases chances charts run on environments with little
     # resources, such as Minikube. If you do want to specify resources, uncomment the following
     # lines, adjust them as necessary, and remove the curly braces after 'resources:'.
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
-
-  # -- [Node selector]
-  nodeSelector: {}
-
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-
-  # -- Assign custom [affinity] rules
-  affinity: {}
+     limits:
+       cpu: 100m
+       memory: 128Mi
+     requests:
+       cpu: 100m
+       memory: 128Mi
 
   # -- If specified, indicates the pod's priority. If not specified, the pod priority will be default or zero if there is no default.
   priorityClassName: ""
@@ -2071,9 +2057,6 @@ notifications:
   # -- Notifications controller name string
   name: notifications-controller
 
-  # -- Assign custom [affinity] rules
-  affinity: {}
-
   # -- Argo CD dashboard url; used in place of {{.context.argocdUrl}} in templates
   argocdUrl:
 
@@ -2092,7 +2075,8 @@ notifications:
   imagePullSecrets: []
 
   # -- [Node selector]
-  nodeSelector: {}
+  nodeSelector:
+    node.coreweave.cloud/class: cpu
 
   # -- The deployment strategy to use to replace existing pods with new ones
   updateStrategy:
@@ -2193,13 +2177,13 @@ notifications:
   containerSecurityContext: {}
 
   # -- Resource limits and requests for the controller
-  resources: {}
-    # limits:
-    #   cpu: 100m
-    #   memory: 128Mi
-    # requests:
-    #   cpu: 100m
-    #   memory: 128Mi
+  resources:
+     limits:
+       cpu: 100m
+       memory: 128Mi
+     requests:
+       cpu: 100m
+       memory: 128Mi
 
   serviceAccount:
     # -- Specifies whether a service account should be created
@@ -2427,9 +2411,6 @@ notifications:
     #   slack:
     #     attachments: "[{\n  \"title\": \"{{ .app.metadata.name}}\",\n  \"title_link\":\"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}\",\n  \"color\": \"#18be52\",\n  \"fields\": [\n  {\n    \"title\": \"Sync Status\",\n    \"value\": \"{{.app.status.sync.status}}\",\n    \"short\": true\n  },\n  {\n    \"title\": \"Repository\",\n    \"value\": \"{{.app.spec.source.repoURL}}\",\n    \"short\": true\n  }\n  {{range $index, $c := .app.status.conditions}}\n  {{if not $index}},{{end}}\n  {{if $index}},{{end}}\n  {\n    \"title\": \"{{$c.type}}\",\n    \"value\": \"{{$c.message}}\",\n    \"short\": true\n  }\n  {{end}}\n  ]\n}]    "
 
-  # -- [Tolerations] for use with node taints
-  tolerations: []
-
   # -- The trigger defines the condition when the notification should be sent
   ## For more information: https://argocd-notifications.readthedocs.io/en/stable/triggers/
   triggers: {}
@@ -2529,12 +2510,3 @@ notifications:
       # requests:
       #   cpu: 100m
       #   memory: 128Mi
-
-      # -- Assign custom [affinity] rules
-      affinity: {}
-
-      # -- [Tolerations] for use with node taints
-      tolerations: []
-
-      # -- [Node selector]
-      nodeSelector: {}
