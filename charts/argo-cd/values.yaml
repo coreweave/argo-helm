@@ -9,6 +9,10 @@ customExternalDnsName: ''
 # -- Provide the annotation value for your ingress controller you wish to use.
 customIngressControllerClassAnnotation: ''
 
+clusterDefault:
+# -- Define a list of namespaces the argo application controller has access to deploy to
+  namespaces: []
+
 ## Argo CD configuration
 ## Ref: https://github.com/argoproj/argo-cd
 ##

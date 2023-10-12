@@ -1,0 +1,28 @@
+apiVersion: v1
+stringData:
+  config: '{"tlsClientConfig":{"insecure":false}}'
+  name: in-cluster-namespaced
+  {{- if ((.Values).clusterDefault).namespaces }}
+  namespaces: "{{ .Release.Namespace}},{{ join "," .Values.clusterDefault.namespaces }}"
+  {{- else}}
+  namespaces: {{ .Release.Namespace }}
+  {{- end}}
+  server: https://kubernetes.default.svc
+kind: Secret
+metadata:
+  labels:
+    argocd.argoproj.io/secret-type: cluster
+    {{- include "argo-cd.labels" (dict "context" . "component" .Values.server.name "name" "secret") | nindent 4 }}
+    {{- with .Values.configs.secret.labels }}
+      {{- toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    managed-by: argocd.argoproj.io
+  {{- with .Values.configs.secret.annotations }}
+    {{- range $key, $value := . }}
+    {{ $key }}: {{ $value | quote }}
+    {{- end }}
+  {{- end }}
+  name: argocd-in-cluster-namespaced
+  namespace: tenant-sta-coreweave-cpierre
+type: Opaque
