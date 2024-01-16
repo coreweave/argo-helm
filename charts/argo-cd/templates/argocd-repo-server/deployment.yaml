@@ -62,7 +62,10 @@ spec:
       {{- with .Values.repoServer.priorityClassName | default .Values.global.priorityClassName }}
       priorityClassName: {{ . }}
       {{- end }}
-      serviceAccountName: {{ include "argo-cd.repoServerServiceAccountName" . }}
+      {{- if .Values.repoServer.terminationGracePeriodSeconds }}
+      terminationGracePeriodSeconds: {{ .Values.repoServer.terminationGracePeriodSeconds }}
+      {{- end }}
+      serviceAccountName: {{ include "argo-cd.repoServer.serviceAccountName" . }}
       containers:
       - name: {{ .Values.repoServer.name }}
         image: {{ default .Values.global.image.repository .Values.repoServer.image.repository }}:{{ default (include "argo-cd.defaultTag" .) .Values.repoServer.image.tag }}
@@ -227,6 +230,18 @@ spec:
               configMapKeyRef:
                 key: reposerver.streamed.manifest.max.extracted.size
                 name: argocd-cmd-params-cm
+                optional: true
+          - name: ARGOCD_REPO_SERVER_HELM_MANIFEST_MAX_EXTRACTED_SIZE
+            valueFrom:
+              configMapKeyRef:
+                key: reposerver.helm.manifest.max.extracted.size
+                name: argocd-cmd-params-cm
+                optional: true
+          - name: ARGOCD_REPO_SERVER_DISABLE_HELM_MANIFEST_MAX_EXTRACTED_SIZE
+            valueFrom:
+              configMapKeyRef:
+                name: argocd-cmd-params-cm
+                key: reposerver.disable.helm.manifest.max.extracted.size
                 optional: true
           - name: ARGOCD_GIT_MODULES_ENABLED
             valueFrom:
