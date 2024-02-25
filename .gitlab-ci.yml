@@ -20,7 +20,7 @@ Helm push:
       - coreweave
     changes:
       - .gitlab-ci.yml
-      - charts/argo-cd/*
+      - charts/argo-cd/**/*
   image:
     name: alpine/helm:3.3.1
     entrypoint: [""]
