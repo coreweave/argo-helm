@@ -1,7 +1,7 @@
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
-  name: argocd-full-access
+  name: {{ .Release.Name }}-argocd-full-access
 rules:
   - apiGroups:
       - ""
@@ -166,6 +166,7 @@ rules:
       - patch
   - apiGroups:
       - traefik.containo.us
+      - traefik.io
     resources:
       - ingressroutes
       - ingressroutetcps
@@ -174,6 +175,8 @@ rules:
       - tlsoptions
       - tlsstores
       - traefikservices
+      - serverstransports
+      - middlewaretcps
     verbs:
       - '*'
   - apiGroups:
