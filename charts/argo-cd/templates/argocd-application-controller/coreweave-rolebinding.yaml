@@ -10,5 +10,5 @@ roleRef:
   name: argocd-full-access
 subjects:
 - kind: ServiceAccount
-  name: {{ template "argo-cd.controllerServiceAccountName" . }}
+  name: {{ include "argo-cd.controller.serviceAccountName" . }}
   namespace: {{ .Release.Namespace }}

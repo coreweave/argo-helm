@@ -27,6 +27,7 @@ spec:
               service:
                 name: {{ $serviceName }}
                 port:
+                  {{- if kindIs "float64" $servicePort }}
                   number: {{ $servicePort }}
                   {{- else }}
                   name: {{ $servicePort }}
