@@ -86,6 +86,7 @@ The `config.registries` value can be used exactly as it looks in the documentati
 | config.sshConfig | object | `{}` | Argo CD Image Updater ssh client parameter configuration. |
 | extraArgs | list | `[]` | Extra arguments for argocd-image-updater not defined in `config.argocd`. If a flag contains both key and value, they need to be split to a new entry |
 | extraEnv | list | `[]` | Extra environment variables for argocd-image-updater |
+| extraObjects | list | `[]` | Extra K8s manifests to deploy for argocd-image-updater |
 | fullnameOverride | string | `""` | Global fullname (argocd-image-updater.fullname in _helpers.tpl) override |
 | image.pullPolicy | string | `"Always"` | Default image pull policy |
 | image.repository | string | `"quay.io/argoprojlabs/argocd-image-updater"` | Default image repository |
@@ -114,6 +115,7 @@ The `config.registries` value can be used exactly as it looks in the documentati
 | securityContext | object | `{}` | Security context settings for the deployment |
 | serviceAccount.annotations | object | `{}` | Annotations to add to the service account |
 | serviceAccount.create | bool | `true` | Specifies whether a service account should be created |
+| serviceAccount.labels | object | `{}` | Labels to add to the service account |
 | serviceAccount.name | string | `""` | The name of the service account to use. If not set and create is true, a name is generated using the fullname template |
 | tolerations | list | `[]` | Kubernetes toleration settings for the deployment |
 | updateStrategy | object | `{"type":"Recreate"}` | The deployment strategy to use to replace existing pods with new ones |

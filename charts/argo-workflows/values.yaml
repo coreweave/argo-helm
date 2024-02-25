@@ -146,7 +146,8 @@ controller:
     capabilities:
       drop:
         - ALL
-  # -- enable persistence using postgres
+  # -- enable Workflow Archive to store the status of workflows. Postgres and MySQL (>= 5.7.8) are available.
+  ## Ref: https://argo-workflows.readthedocs.io/en/stable/workflow-archive/
   persistence: {}
   # connectionPool:
   #   maxIdleConns: 100
@@ -171,15 +172,26 @@ controller:
   #   # sslMode must be one of: disable, require, verify-ca, verify-full
   #   # you can find more information about those ssl options here: https://godoc.org/github.com/lib/pq
   #   sslMode: require
+  # mysql:
+  #   host: localhost
+  #   port: 3306
+  #   database: argo
+  #   tableName: argo_workflows
+  #   userNameSecret:
+  #     name: argo-mysql-config
+  #     key: username
+  #   passwordSecret:
+  #     name: argo-mysql-config
+  #     key: password
 
   # -- Default values that will apply to all Workflows from this controller, unless overridden on the Workflow-level.
   # Only valid for 2.7+
-  ## See more: https://argoproj.github.io/argo-workflows/default-workflow-specs/
+  ## See more: https://argo-workflows.readthedocs.io/en/stable/default-workflow-specs/
   workflowDefaults: {}
   #   spec:
   #     ttlStrategy:
   #       secondsAfterCompletion: 84600
-  #     # Ref: https://argoproj.github.io/argo-workflows/artifact-repository-ref/
+  #     # Ref: https://argo-workflows.readthedocs.io/en/stable/artifact-repository-ref/
   #     artifactRepositoryRef:
   #       configMap: my-artifact-repository # default is "artifact-repositories"
   #       key: v2-s3-artifact-repository # default can be set by the `workflows.argoproj.io/default-artifact-repository` annotation in config map.
@@ -331,7 +343,7 @@ controller:
   priorityClassName: ""
 
   # -- Configure Argo Server to show custom [links]
-  ## Ref: https://argoproj.github.io/argo-workflows/links/
+  ## Ref: https://argo-workflows.readthedocs.io/en/stable/links/
   links: []
   # -- Configure Argo Server to show custom [columns]
   ## Ref: https://github.com/argoproj/argo-workflows/pull/10693
@@ -544,7 +556,7 @@ server:
 
   # -- Run the argo server in "secure" mode. Configure this value instead of `--secure` in extraArgs.
   ## See the following documentation for more details on secure mode:
-  ## https://argoproj.github.io/argo-workflows/tls/
+  ## https://argo-workflows.readthedocs.io/en/stable/tls/
   secure: false
 
   # -- Extra environment variables to provide to the argo-server container
@@ -556,11 +568,11 @@ server:
   authMode: ""
 
   # -- A list of supported authentication modes. Available values are `server`, `client`, or `sso`. If you provide sso, please configure `.Values.server.sso` as well.
-  ## Ref: https://argoproj.github.io/argo-workflows/argo-server-auth-mode/
+  ## Ref: https://argo-workflows.readthedocs.io/en/stable/argo-server-auth-mode/
   authModes: []
 
   # -- Extra arguments to provide to the Argo server binary.
-  ## Ref: https://argoproj.github.io/argo-workflows/argo-server/#options
+  ## Ref: https://argo-workflows.readthedocs.io/en/stable/argo-server/#options
   extraArgs: []
 
   logging:
@@ -763,47 +775,50 @@ artifactRepository:
     #   key: secretkey
     # # insecure will disable TLS. Primarily used for minio installs not configured with TLS
     # insecure: false
+    # caSecret:
+    #   name: ca-root
+    #   key: cert.pem
     # bucket:
     # endpoint:
     # region:
     # roleARN:
     # useSDKCreds: true
     # encryptionOptions:
-    #    enableEncryption: true
+    #   enableEncryption: true
   # -- Store artifact in a GCS object store
   # @default -- `{}` (See [values.yaml])
   gcs: {}
-  # bucket: <project>-argo
-  # keyFormat: "{{ \"{{workflow.namespace}}/{{workflow.name}}/{{pod.name}}\" }}"
-  # serviceAccountKeySecret is a secret selector.
-  # It references the k8s secret named 'my-gcs-credentials'.
-  # This secret is expected to have have the key 'serviceAccountKey',
-  # containing the base64 encoded credentials
-  # to the bucket.
-  #
-  # If it's running on GKE and Workload Identity is used,
-  # serviceAccountKeySecret is not needed.
-  # serviceAccountKeySecret:
-  # name: my-gcs-credentials
-  # key: serviceAccountKey
+    # bucket: <project>-argo
+    # keyFormat: "{{ \"{{workflow.namespace}}/{{workflow.name}}/{{pod.name}}\" }}"
+    # # serviceAccountKeySecret is a secret selector.
+    # # It references the k8s secret named 'my-gcs-credentials'.
+    # # This secret is expected to have have the key 'serviceAccountKey',
+    # # containing the base64 encoded credentials
+    # # to the bucket.
+    # #
+    # # If it's running on GKE and Workload Identity is used,
+    # # serviceAccountKeySecret is not needed.
+    # serviceAccountKeySecret:
+    #   name: my-gcs-credentials
+    #   key: serviceAccountKey
   # -- Store artifact in Azure Blob Storage
   # @default -- `{}` (See [values.yaml])
   azure: {}
-  # endpoint: https://mystorageaccountname.blob.core.windows.net
-  # container: my-container-name
-  # blobNameFormat: path/in/container
-  ## accountKeySecret is a secret selector.
-  ## It references the k8s secret named 'my-azure-storage-credentials'.
-  ## This secret is expected to have have the key 'account-access-key',
-  ## containing the base64 encoded credentials to the storage account.
-  ## If a managed identity has been assigned to the machines running the
-  ## workflow (e.g., https://docs.microsoft.com/en-us/azure/aks/use-managed-identity)
-  ## then accountKeySecret is not needed, and useSDKCreds should be
-  ## set to true instead:
-  # useSDKCreds: true
-  # accountKeySecret:
-  #  name: my-azure-storage-credentials
-  #  key: account-access-key
+    # endpoint: https://mystorageaccountname.blob.core.windows.net
+    # container: my-container-name
+    # blobNameFormat: path/in/container
+    # # accountKeySecret is a secret selector.
+    # # It references the k8s secret named 'my-azure-storage-credentials'.
+    # # This secret is expected to have have the key 'account-access-key',
+    # # containing the base64 encoded credentials to the storage account.
+    # # If a managed identity has been assigned to the machines running the
+    # # workflow (e.g., https://docs.microsoft.com/en-us/azure/aks/use-managed-identity)
+    # # then accountKeySecret is not needed, and useSDKCreds should be
+    # # set to true instead:
+    # useSDKCreds: true
+    # accountKeySecret:
+    #   name: my-azure-storage-credentials
+    #   key: account-access-key
 
 # -- The section of custom artifact repository.
 # Utilize a custom artifact repository that is not one of the current base ones (s3, gcs, azure)
@@ -817,7 +832,7 @@ customArtifactRepository: {}
 #     name: artifactory-creds
 #     key: password
 
-# -- The section of [artifact repository ref](https://argoproj.github.io/argo-workflows/artifact-repository-ref/).
+# -- The section of [artifact repository ref](https://argo-workflows.readthedocs.io/en/stable/artifact-repository-ref/).
 # Each map key is the name of configmap
 # @default -- `{}` (See [values.yaml])
 artifactRepositoryRef: {}
@@ -872,7 +887,7 @@ artifactRepositoryRef: {}
 
 emissary:
   # -- The command/args for each image on workflow, needed when the command is not specified and the emissary executor is used.
-  ## See more: https://argoproj.github.io/argo-workflows/workflow-executors/#emissary-emissary
+  ## See more: https://argo-workflows.readthedocs.io/en/stable/workflow-executors/#emissary-emissary
   images: []
   #  argoproj/argosay:v2:
   #    cmd: [/argosay]
