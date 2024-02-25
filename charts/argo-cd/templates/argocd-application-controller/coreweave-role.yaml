@@ -175,8 +175,6 @@ rules:
       - tlsoptions
       - tlsstores
       - traefikservices
-      - serverstransports
-      - middlewaretcps
     verbs:
       - '*'
   - apiGroups:
